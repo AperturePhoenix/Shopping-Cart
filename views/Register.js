@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { View, AsyncStorage } from 'react-native'
-import { Button, Input} from 'react-native-elements'
-import firebase, { database } from 'firebase'
+import { View, AsyncStorage, Alert } from 'react-native'
+import { Button, Input } from 'react-native-elements'
+import firebase from 'firebase'
 import base64 from 'react-native-base64'
 
 class Register extends Component {
@@ -14,17 +14,26 @@ class Register extends Component {
 
         this.db = firebase.firestore().collection('users')
         this.state = {
-            username: '',
-            name: '',
-            password: ''
+            username: '', usernameError: '',
+            name: '', nameError: '',
+            password: '', passwordError: ''
         }
 
 
     }
 
-    _registerAccount = () => {
-        this._setLoginData()
-        this.props.navigation.navigate('App')
+    registerAccount = () => {
+        if (this.validateInformation()) {
+            this.db.doc(this.state.username).get()
+                .then(user => {
+                    if (!user.exists) {
+                        this._setLoginData()
+                        this.props.navigation.navigate('App')
+                    } else {
+                        Alert.alert(title='Error', message='username is already taken')
+                    }
+                })
+        }
     }
 
     _setLoginData = async() => {
@@ -37,13 +46,43 @@ class Register extends Component {
         await AsyncStorage.setItem('password', base64.encode(this.state.password))
     }
 
+    validateInformation = () => {
+        isValid = true
+        if (!this.state.username) {
+            this.setState({
+                usernameError: 'Please enter a username'
+            })
+            isValid = false
+        } else { this.setState({
+            usernameError: ''
+        })}
+        if (!this.state.name) {
+            this.setState({
+                nameError: 'Please enter a name'
+            })
+            isValid = false
+        } else { this.setState({
+            nameError: ''
+        })}
+        if (!this.state.password) {
+            this.setState({
+                passwordError: 'Please enter a password'
+            })
+            isValid = false
+        } else { this.setState({
+            passwordError: ''
+        })}
+
+        return isValid
+    }
+
     render() {
         return(
             <View>
-                <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} />
-                <Input placeholder='Name' onChangeText={ name => this.setState({ name: name })} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} />
-                <Button title='Register' onPress={ () => this._registerAccount() } />
+                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
+                <Input placeholder='Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: 'red' }} errorMessage={this.state.nameError} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError}/>
+                <Button title='Register' onPress={ () => this.registerAccount() } />
             </View>
         )
     }

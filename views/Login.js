@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { View, AsyncStorage } from 'react-native'
 import { Button, Input } from 'react-native-elements'
+import firebase from 'firebase'
 import base64 from 'react-native-base64'
 
 class Login extends Component {
@@ -11,6 +12,7 @@ class Login extends Component {
     constructor(props) {
         super(props)
 
+        thisdb = firebase.firestore().collection('users')
         this.state = {
             username: '',
             password: ''
