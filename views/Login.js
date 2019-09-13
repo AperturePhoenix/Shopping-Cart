@@ -1,11 +1,21 @@
 import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, AsyncStorage } from 'react-native'
 import { Button } from 'react-native-elements'
 
 class Login extends Component {
-    static navigationOptions = {
-        title: 'Please Log In'
+    constructor(props) {
+        super(props)
+
+        this.state = {
+            username: '',
+            password: ''
+        }
     }
+
+    static navigationOptions = {
+        title: 'Please Sign In'
+    }
+
     render() {
         return(
             <View>
@@ -14,6 +24,17 @@ class Login extends Component {
             </View>
         )
     }
+
+    _logInAsync = async() => {
+        await AsyncStorage.setItem('username', this.state.username)
+        this.props.navigate.navigate('App')
+    }
+
+    //TODO: Log out
+    // _signOutAsync = async () => {
+    //     await AsyncStorage.clear();
+    //     this.props.navigation.navigate('Auth');
+    //   };
 }
 
 export default Login

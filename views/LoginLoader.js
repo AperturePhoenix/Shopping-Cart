@@ -8,10 +8,10 @@ class LoginLoader extends Component {
 
     // Fetch the token from storage then navigate to our appropriate place
     _bootstrapAsync = async() => {
-        const userToken = await AsyncStorage.getItem('userToken')
+        const username = await AsyncStorage.getItem('username')
 
         //If user is already logged in go to app else go to login screen
-        this.props.navigation.navigate(userToken ? 'App' : 'Auth');
+        this.props.navigation.navigate(username ? 'App' : 'Auth');
     }
 
     render() {
