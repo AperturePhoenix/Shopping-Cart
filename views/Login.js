@@ -1,8 +1,13 @@
 import React, { Component } from 'react'
-import { View, Text, AsyncStorage } from 'react-native'
-import { Button } from 'react-native-elements'
+import { View, AsyncStorage } from 'react-native'
+import { Button, Input } from 'react-native-elements'
+import base64 from 'react-native-base64'
 
 class Login extends Component {
+    static navigationOptions = {
+        title: 'Please Sign In'
+    }
+
     constructor(props) {
         super(props)
 
@@ -12,22 +17,25 @@ class Login extends Component {
         }
     }
 
-    static navigationOptions = {
-        title: 'Please Sign In'
-    }
-
     render() {
         return(
             <View>
-                <Text>This is the Login Screen</Text>
-                <Button title='Go to My Shopping List' onPress={ () => this.props.navigation.navigate('Home')} />
+                <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} />
+                <Button title='Sign In' onPress={ this._logIn } />
+                <Button title='Register' onPress={ () => this.props.navigation.navigate('Register') } />
             </View>
         )
     }
 
-    _logInAsync = async() => {
+    _logIn = () => {
+        this._setLoginData()
+        this.props.navigation.navigate('App')
+    }
+
+    _setLoginData = async() => {
         await AsyncStorage.setItem('username', this.state.username)
-        this.props.navigate.navigate('App')
+        await AsyncStorage.setItem('password', base64.encode(this.state.password))
     }
 
     //TODO: Log out
