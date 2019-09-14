@@ -1,22 +1,32 @@
 import React, { Component } from 'react'
-import { View, Text, AsyncStorage } from 'react-native'
-import { Button } from 'react-native-elements'
+import { View, Text, AsyncStorage, StyleSheet, FlatList } from 'react-native'
+import { Button, Input } from 'react-native-elements'
+import firebase from 'firebase'
 
 class MyShoppingList extends Component {
     static navigationOptions = {
         title: 'My Shopping List'
     }
 
-    render() {
-        return (
-            <View>
-                <Text>This is My Shopping List</Text>
-                <Button title='Reset Data' onPress={ AsyncStorage.clear } />
-            </View>
-        )
+    constructor(props) {
+        super(props)
+
+        this.itemJoiner = []
+
+        this.db = firebase.firestore().collection('users')
+        this.state = {
+            items: [],
+            item: '', itemError: '',
+            quantity: 0, quantityError: ''
+        }
     }
 
-    _reset = () => {
+    addItem = () => { 
+        this.itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
+        this.setState({ items: [...this.itemJoiner] })
+     }
+
+    reset = () => {
         this._clearData()
         this.props.navigation.navigate('App')
     }
@@ -24,6 +34,29 @@ class MyShoppingList extends Component {
     _clearData = async() => {
         await AsyncStorage.clear()
     }
+
+    render() {
+        return (
+            <View style={ styles.MainContainer }>
+                <Button title='Reset Data' onPress= { AsyncStorage.clear } />
+                <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: 'red' }} errorMessage={this.state.itemError} />
+                <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: 'red' }} errorMessage={this.state.quantityError} />
+                <Button title='Add Item' onPress={() => this.addItem()} />
+                <FlatList
+                    data={ this.state.items }
+                    renderItem={ ({ item }) => <Text>{item.name}: {item.quantity}</Text> }
+                    keyExtractor={ (index) => index.toString() }
+                />
+            </View>
+        )
+    }
 }
+
+const styles=StyleSheet.create({
+    MainContainer: {
+        flex: 1,
+        flexDirection: 'column'
+    }
+})
 
 export default MyShoppingList
