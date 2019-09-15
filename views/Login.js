@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { View, AsyncStorage, Alert } from 'react-native'
+import { View, AsyncStorage, Alert, StyleSheet } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import base64 from 'react-native-base64'
 
-class Login extends Component {
+export default class Login extends Component {
     static navigationOptions = {
-        title: 'Please Sign In'
+        header: null
     }
 
     constructor(props) {
@@ -17,17 +17,6 @@ class Login extends Component {
             username: '', usernameError: '',
             password: '', passwordError: ''
         }
-    }
-
-    render() {
-        return(
-            <View>
-                <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError} />
-                <Button title='Sign In' onPress={ this.logIn } />
-                <Button title='Register' onPress={ () => this.props.navigation.navigate('Register') } />
-            </View>
-        )
     }
 
     validateInformation = () => {
@@ -71,6 +60,35 @@ class Login extends Component {
         await AsyncStorage.setItem('name', this.db.doc(this.state.username).get('name'))
         await AsyncStorage.setItem('password', base64.encode(this.state.password))
     }
+
+    render() {
+        return(
+            <View style={styles.MainContainer}>
+            <View style={styles.ChildContainer}>
+                <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError} />
+                <Button title='Sign In' type='clear' titleStyle={styles.Text} onPress={ this.logIn } />
+                <Button title='Register' type='clear' titleStyle={styles.Text} onPress={ () => this.props.navigation.navigate('Register') } />
+                </View>
+            </View>
+        )
+    }
 }
 
-export default Login
+const styles = StyleSheet.create({
+    MainContainer: {
+        backgroundColor: '#fff',
+        flex: 1
+    },
+    ChildContainer: {
+        marginHorizontal: 20,
+        marginVertical: 20,
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    Text: {
+        color: '#6db105'
+    }
+})

@@ -4,7 +4,7 @@ import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import base64 from 'react-native-base64'
 
-class Register extends Component {
+export default class Register extends Component {
     static navigationOptions = {
         title: 'Register an Account'
     }
@@ -87,5 +87,3 @@ class Register extends Component {
         )
     }
 }
-
-export default Register

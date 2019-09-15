@@ -3,7 +3,7 @@ import { View, Text, AsyncStorage } from 'react-native'
 import firebase, { database } from 'firebase'
 import '@firebase/firestore';
 
-class LoginLoader extends Component {
+export default class LoginLoader extends Component {
     componentWillMount() {
         const firebaseConfig = {
             apiKey: "AIzaSyCJLiH1KdAcmdySrvEiydkNxRonH9QCvKg",
@@ -38,5 +38,3 @@ class LoginLoader extends Component {
         )
     }
 }
-
-export default LoginLoader

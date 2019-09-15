@@ -5,7 +5,21 @@ import Login from './views/Login'
 import Register from './views/Register'
 import MyShoppingList from './views/MyShoppingList'
 
-const authStack = createStackNavigator({ Login: Login, Register: Register })
+const authStack = createStackNavigator({ 
+  Login: Login, 
+  Register: Register 
+}, {
+  initialRouteName: 'Login',
+  defaultNavigationOptions: {
+    headerStyle: {
+      backgroundColor: '#ffd602',
+    },
+    headerTintColor: '#fff',
+    headerTitleStyle: {
+      fontWeight: 'bold',
+    },
+  },
+})
 const appStack = createStackNavigator({ Home: MyShoppingList })
 
 export default createAppContainer(
@@ -13,5 +27,16 @@ export default createAppContainer(
     AuthLoading: LoginLoader,
     Auth: authStack,
     App: appStack
-  }, { initialRouteName: 'AuthLoading' })
+  }, {
+    initialRouteName: 'AuthLoading',
+    defaultNavigationOptions: {
+      headerStyle: {
+        backgroundColor: '#ffd602',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  })
 )
