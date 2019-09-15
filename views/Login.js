@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import { View, AsyncStorage, Alert, StyleSheet } from 'react-native'
+import { View, AsyncStorage, Alert, Image, Text } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import base64 from 'react-native-base64'
-import { MainContainerStyle, ChildContainerStyle, TextStyle } from './../store/Styler'
+import { MainContainerStyle, ChildContainerStyle, TextHeaderStyle, ButtonTextStyle } from './../store/Styler'
 
 export default class Login extends Component {
     static navigationOptions = {
@@ -65,11 +65,13 @@ export default class Login extends Component {
     render() {
         return(
             <View style={MainContainerStyle}>
-            <View style={ChildContainerStyle}>
-                <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError} />
-                <Button title='Sign In' type='clear' titleStyle={TextStyle} onPress={ this.logIn } />
-                <Button title='Register' type='clear' titleStyle={TextStyle} onPress={ () => this.props.navigation.navigate('Register') } />
+                <View style={ChildContainerStyle}>
+                    <Image source={require('../assets/Starfruit.png')} style={{width: 200, height: 200, marginBottom: 10 }} />
+                    <Text style={ TextHeaderStyle } >Shopping Cart</Text>
+                    <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
+                    <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError} />
+                    <Button title='Sign In' type='clear' titleStyle={ButtonTextStyle} onPress={ this.logIn } />
+                    <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.navigate('Register') } />
                 </View>
             </View>
         )

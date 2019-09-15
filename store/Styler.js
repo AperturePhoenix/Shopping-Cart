@@ -12,6 +12,10 @@ export const ChildContainerStyle={
     alignItems: 'center'
 }
 
-export const TextStyle={
+export const TextHeaderStyle={
+    fontSize: 25
+}
+
+export const ButtonTextStyle={
     color: '#6db105'
 }

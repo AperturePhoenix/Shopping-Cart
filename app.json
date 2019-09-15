@@ -23,7 +23,11 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "android": {
+      "package": "com.aperturephoenix.shoppingcart"
+    },
     "ios": {
+      "bundleIdentifier": "com.aperturephoenix.shoppingcart",
       "supportsTablet": true
     }
   }

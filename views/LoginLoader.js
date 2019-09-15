@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { View, Text, AsyncStorage } from 'react-native'
-import firebase, { database } from 'firebase'
+import { View, Image, AsyncStorage } from 'react-native'
+import { MainContainerStyle, ChildContainerStyle } from './../store/Styler'
+import firebase from 'firebase'
 import '@firebase/firestore';
 
 export default class LoginLoader extends Component {
@@ -32,8 +33,10 @@ export default class LoginLoader extends Component {
     render() {
         return(
             //TODO: Loading image
-            <View>
-                <Text>This is the LoginLoader</Text>
+            <View style={MainContainerStyle}>
+                <View style={ChildContainerStyle}>
+                    <Image source={require('../assets/Starfruit.png')} style={{width: 200, height: 200 }} />
+                </View>
             </View>
         )
     }
