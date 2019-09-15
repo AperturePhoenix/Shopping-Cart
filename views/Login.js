@@ -3,6 +3,7 @@ import { View, AsyncStorage, Alert, StyleSheet } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import base64 from 'react-native-base64'
+import { MainContainerStyle, ChildContainerStyle, TextStyle } from './../store/Styler'
 
 export default class Login extends Component {
     static navigationOptions = {
@@ -63,32 +64,14 @@ export default class Login extends Component {
 
     render() {
         return(
-            <View style={styles.MainContainer}>
-            <View style={styles.ChildContainer}>
+            <View style={MainContainerStyle}>
+            <View style={ChildContainerStyle}>
                 <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
                 <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError} />
-                <Button title='Sign In' type='clear' titleStyle={styles.Text} onPress={ this.logIn } />
-                <Button title='Register' type='clear' titleStyle={styles.Text} onPress={ () => this.props.navigation.navigate('Register') } />
+                <Button title='Sign In' type='clear' titleStyle={TextStyle} onPress={ this.logIn } />
+                <Button title='Register' type='clear' titleStyle={TextStyle} onPress={ () => this.props.navigation.navigate('Register') } />
                 </View>
             </View>
         )
     }
 }
-
-const styles = StyleSheet.create({
-    MainContainer: {
-        backgroundColor: '#fff',
-        flex: 1
-    },
-    ChildContainer: {
-        marginHorizontal: 20,
-        marginVertical: 20,
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    Text: {
-        color: '#6db105'
-    }
-})

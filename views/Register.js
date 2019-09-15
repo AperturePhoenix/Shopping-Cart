@@ -3,10 +3,11 @@ import { View, AsyncStorage, Alert } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 import base64 from 'react-native-base64'
+import { MainContainerStyle, ChildContainerStyle, TextStyle } from './../store/Styler'
 
 export default class Register extends Component {
     static navigationOptions = {
-        title: 'Register an Account'
+        header: null
     }
 
     constructor(props) {
@@ -78,11 +79,14 @@ export default class Register extends Component {
 
     render() {
         return(
-            <View>
-                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
+            <View style={MainContainerStyle}>
+            <View style={ChildContainerStyle}>
                 <Input placeholder='Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: 'red' }} errorMessage={this.state.nameError} />
+                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
                 <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError}/>
-                <Button title='Register' onPress={ () => this.registerAccount() } />
+                <Button title='Register' type='clear' titleStyle={TextStyle} onPress={ () => this.registerAccount() } />
+                <Button title='Back' type='clear' titleStyle={TextStyle} onPress={ () => this.props.navigation.goBack() } />
+            </View>
             </View>
         )
     }

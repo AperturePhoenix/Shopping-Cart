@@ -10,15 +10,6 @@ const authStack = createStackNavigator({
   Register: Register 
 }, {
   initialRouteName: 'Login',
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: '#ffd602',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontWeight: 'bold',
-    },
-  },
 })
 const appStack = createStackNavigator({ Home: MyShoppingList })
 
