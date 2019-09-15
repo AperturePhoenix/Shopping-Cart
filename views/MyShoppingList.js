@@ -3,7 +3,7 @@ import { View, Text, AsyncStorage, StyleSheet, FlatList } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import firebase from 'firebase'
 
-class MyShoppingList extends Component {
+export default class MyShoppingList extends Component {
     static navigationOptions = {
         title: 'My Shopping List'
     }
@@ -58,5 +58,3 @@ const styles=StyleSheet.create({
         flexDirection: 'column'
     }
 })
-
-export default MyShoppingList
