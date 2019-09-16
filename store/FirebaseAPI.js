@@ -36,8 +36,8 @@ export default class FirebaseAPI {
 
     static getField = async(username, field, completion) => {
         await this.db.doc(username).get()
-            .then(documentSnapshot => {
-                completion(documentSnapshot.get(field))
+            .then(userSnapshot => {
+                completion(userSnapshot.get(field))
             })
             .catch (error => {
                 console.log(error)
@@ -46,6 +46,33 @@ export default class FirebaseAPI {
 
     static setFields = async(username, fields) => {
         await this.db.doc(username).set(fields)
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static itemExists = async(username, item, completion) => {
+        await this.db.doc(username).collection(items).doc(item).get()
+            .then(item => {
+                completion(item.exists)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static addItem = async(username, item, quantity) => {
+        console.log('adding item')
+        await this.db.doc(username).collection('items').doc(item).set({
+            quantity: quantity
+        })
+    }
+
+    static getItemField = async(username, item, field, completion) => {
+        await this.db.doc(username).collection('items').doc(item)
+            .then(itemSnapshot => {
+                completion(itemSnapshot.get(field))
+            })
             .catch(error => {
                 console.log(error)
             })

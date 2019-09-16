@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, AsyncStorage, StyleSheet, FlatList } from 'react-native'
 import { Button, Input } from 'react-native-elements'
-import firebase from 'firebase'
+import FirebaseAPI from './../store/FirebaseAPI'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -12,8 +12,6 @@ export default class MyShoppingList extends Component {
         super(props)
 
         this.itemJoiner = []
-
-        this.db = firebase.firestore().collection('users')
         this.state = {
             items: [],
             item: '', itemError: '',
@@ -24,6 +22,8 @@ export default class MyShoppingList extends Component {
     addItem = () => { 
         this.itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
         this.setState({ items: [...this.itemJoiner] })
+        console.log('calling add item')
+        FirebaseAPI.addItem('Aperture Phoenix', this.state.item, this.state.quantity)
      }
 
     reset = () => {
