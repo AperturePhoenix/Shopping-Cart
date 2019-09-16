@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { View, AsyncStorage, Alert } from 'react-native'
+import { View, KeyboardAvoidingView, AsyncStorage, Alert } from 'react-native'
 import { Button, Input } from 'react-native-elements'
-import firebase from 'firebase'
+import FirebaseAPI from './../store/FirebaseAPI'
 import base64 from 'react-native-base64'
 import { MainContainerStyle, ChildContainerStyle, ButtonTextStyle } from './../store/Styler'
 
@@ -13,7 +13,6 @@ export default class Register extends Component {
     constructor(props) {
         super(props)
 
-        this.db = firebase.firestore().collection('users')
         this.state = {
             username: '', usernameError: '',
             name: '', nameError: '',
@@ -25,21 +24,20 @@ export default class Register extends Component {
 
     registerAccount = () => {
         if (this.validateInformation()) {
-            this.db.doc(this.state.username).get()
-                .then(user => {
-                    if (!user.exists) {
-                        this._setLoginData()
-                        this.props.navigation.navigate('App')
-                    } else {
-                        Alert.alert(title='Error', message='username is already taken')
-                    }
-                })
+            FirebaseAPI.usernameExists(this.state.username, (exists) => {
+                if (!exists) {
+                    this._setLoginData()
+                    this.props.navigation.navigate('App')
+                } else {
+                    Alert.alert(title='Error', message='username is already taken')
+                }
+            })
         }
     }
 
     _setLoginData = async() => {
         await AsyncStorage.setItem('username', this.state.username)
-        this.db.doc(this.state.username).set({
+        FirebaseAPI.setFields(this.state.username, {
             name: this.state.name,
             password: base64.encode(this.state.password)
         })
@@ -80,13 +78,13 @@ export default class Register extends Component {
     render() {
         return(
             <View style={MainContainerStyle}>
-            <View style={ChildContainerStyle}>
+            <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
                 <Input placeholder='Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: 'red' }} errorMessage={this.state.nameError} />
                 <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
                 <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError}/>
                 <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.registerAccount() } />
                 <Button title='Back' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.goBack() } />
-            </View>
+            </KeyboardAvoidingView>
             </View>
         )
     }

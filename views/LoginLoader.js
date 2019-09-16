@@ -1,21 +1,11 @@
 import React, { Component } from 'react'
 import { View, Image, AsyncStorage } from 'react-native'
+import FirebaseAPI from './../store/FirebaseAPI'
 import { MainContainerStyle, ChildContainerStyle } from './../store/Styler'
-import firebase from 'firebase'
-import '@firebase/firestore';
 
 export default class LoginLoader extends Component {
     componentWillMount() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJLiH1KdAcmdySrvEiydkNxRonH9QCvKg",
-            authDomain: "shopping-cart-d8b09.firebaseapp.com",
-            databaseURL: "https://shopping-cart-d8b09.firebaseio.com",
-            projectId: "shopping-cart-d8b09",
-            storageBucket: "shopping-cart-d8b09.appspot.com",
-            messagingSenderId: "925913407970",
-            appId: "1:925913407970:web:011a4a3e494627b62f19bb"
-          }
-        firebase.initializeApp(firebaseConfig)
+        FirebaseAPI.initializeApp()
     }
 
     componentDidMount() {
