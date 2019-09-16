@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, AsyncStorage, StyleSheet, FlatList } from 'react-native'
+import { View, Text, AsyncStorage, StyleSheet, FlatList, Alert } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import FirebaseAPI from './../store/FirebaseAPI'
 
@@ -11,7 +11,14 @@ export default class MyShoppingList extends Component {
     constructor(props) {
         super(props)
 
-        this.itemJoiner = []
+        AsyncStorage.getItem('username')
+            .then(username => {
+                this.username = username
+                FirebaseAPI.getItems(this.username, (items) => {
+                    this.itemJoiner = items
+                    this.setState({ items: this.itemJoiner})
+                })
+            })
         this.state = {
             items: [],
             item: '', itemError: '',
@@ -19,11 +26,17 @@ export default class MyShoppingList extends Component {
         }
     }
 
-    addItem = () => { 
-        this.itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
-        this.setState({ items: [...this.itemJoiner] })
-        console.log('calling add item')
-        FirebaseAPI.addItem('Aperture Phoenix', this.state.item, this.state.quantity)
+    addItem = () => {
+        FirebaseAPI.itemExists(this.username, this.state.item, (exists) => {
+            if (!exists) {
+                this.itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
+                this.setState({ items: [...this.itemJoiner] })
+                FirebaseAPI.addItem(this.username, this.state.item, this.state.quantity)
+            }
+            else {
+                Alert.alert(message='Item is already in the cart')
+            }
+        })
      }
 
     reset = () => {

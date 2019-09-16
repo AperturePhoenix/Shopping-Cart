@@ -18,26 +18,26 @@ export default class FirebaseAPI {
         this.db = firebase.firestore().collection('users')
     }
 
-    static usernameExists = async(username, completion) => {
+    static usernameExists = async(username, callback) => {
         await this.db.doc(username).get()
             .catch (error => {
                 console.log(error)
             })
             .then (user => {
-                completion(user.exists)
+                callback(user.exists)
             })     
     }
 
-    static login = async(username, password, completion) => {
+    static login = async(username, password, callback) => {
         await this.getField(username, 'password', (encodedPassword) => {
-            completion(base64.encode(password) == encodedPassword)
+            callback(base64.encode(password) == encodedPassword)
         })
     }
 
-    static getField = async(username, field, completion) => {
+    static getField = async(username, field, callback) => {
         await this.db.doc(username).get()
             .then(userSnapshot => {
-                completion(userSnapshot.get(field))
+                callback(userSnapshot.get(field))
             })
             .catch (error => {
                 console.log(error)
@@ -51,10 +51,24 @@ export default class FirebaseAPI {
             })
     }
 
-    static itemExists = async(username, item, completion) => {
-        await this.db.doc(username).collection(items).doc(item).get()
+    static itemExists = async(username, item, callback) => {
+        await this.db.doc(username).collection('items').doc(item).get()
             .then(item => {
-                completion(item.exists)
+                callback(item.exists)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static getItems = async(username, callback) => {
+        await this.db.doc(username).collection('items').get()
+            .then(querySnapshot => {
+                items = []
+                querySnapshot.forEach(queryDocSnapshot => {
+                    items.push({name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
+                })
+                callback(items)
             })
             .catch(error => {
                 console.log(error)
@@ -68,10 +82,10 @@ export default class FirebaseAPI {
         })
     }
 
-    static getItemField = async(username, item, field, completion) => {
+    static getItemField = async(username, item, field, callback) => {
         await this.db.doc(username).collection('items').doc(item)
             .then(itemSnapshot => {
-                completion(itemSnapshot.get(field))
+                callback(itemSnapshot.get(field))
             })
             .catch(error => {
                 console.log(error)
