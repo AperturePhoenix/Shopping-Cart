@@ -15,8 +15,7 @@ export default class MyShoppingList extends Component {
             .then(username => {
                 this.username = username
                 FirebaseAPI.getItems(this.username, (items) => {
-                    this.itemJoiner = items
-                    this.setState({ items: this.itemJoiner})
+                    this.setState({ items: items})
                 })
             })
         this.state = {
@@ -29,14 +28,23 @@ export default class MyShoppingList extends Component {
     addItem = () => {
         FirebaseAPI.itemExists(this.username, this.state.item, (exists) => {
             if (!exists) {
-                this.itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
-                this.setState({ items: [...this.itemJoiner] })
+                itemJoiner = [...this.state.items]
+                itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
+                this.setState({ items: [...itemJoiner] })
                 FirebaseAPI.addItem(this.username, this.state.item, this.state.quantity)
             }
             else {
                 Alert.alert(message='Item is already in the cart')
             }
         })
+     }
+
+     removeItem = (item) => {
+        let itemRemover = [...this.state.items]
+        let prevIndex = this.state.items.findIndex(itemName => itemName === item);
+        itemRemover.splice(prevIndex, 1)
+        this.setState({ items: itemRemover })
+        FirebaseAPI.removeItem(this.username, item)
      }
 
     reset = () => {
@@ -57,7 +65,9 @@ export default class MyShoppingList extends Component {
                 <Button title='Add Item' onPress={() => this.addItem()} />
                 <FlatList
                     data={ this.state.items }
-                    renderItem={ ({ item }) => <Text>{item.name}: {item.quantity}</Text> }
+                    renderItem={ ({ item }) => (
+                        <Text onPress={ this.removeItem.bind(this, item.name ) }>{item.name}: {item.quantity}</Text> 
+                    )}
                     keyExtractor={ (index) => index.toString() }
                 />
             </View>

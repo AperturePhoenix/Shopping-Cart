@@ -76,10 +76,13 @@ export default class FirebaseAPI {
     }
 
     static addItem = async(username, item, quantity) => {
-        console.log('adding item')
         await this.db.doc(username).collection('items').doc(item).set({
             quantity: quantity
         })
+    }
+
+    static removeItem = async(username, item) => {
+        await this.db.doc(username).collection('items').doc(item).delete()
     }
 
     static getItemField = async(username, item, field, callback) => {
