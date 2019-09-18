@@ -105,10 +105,24 @@ export default class FirebaseAPI {
             })
     }
 
-    static getGroup = async(username, group, callback) => {
-        await this.doc(username).collection('groups').doc(group).get()
+    static getGroupList = async(username, callback) => {
+        await this.db.doc(username).collection('groups').get()
             .then(groupSnapshot => {
-                callback(groupSnapshot.get('list'))
+                groups = []
+                groupSnapshot.forEach(groupDocSnapshot => {
+                    groups.push({name: groupDocSnapshot.id, usernames: groupDocSnapshot.get('usernames')})
+                })
+                callback(groups)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static getGroupUsernames = async(username, group, callback) => {
+        await this.db.doc(username).collection('groups').doc(group).get()
+            .then(groupSnapshot => {
+                callback(groupSnapshot.get('usernames'))
             })
             .catch(error => {
                 console.log(error)
@@ -116,12 +130,12 @@ export default class FirebaseAPI {
     }
 
     static addUserToGroup = async(username, group, newUser) => {
-        await this.db.doc(username).collection('groups').doc(group).get()
-            .then(group => {
-                
+        this.getGroupUsernames(username, group, usernames => {
+            if (usernames === undefined) usernames = []
+            usernames.push(newUser)
+            this.db.doc(username).collection('groups').doc(group).set({
+                usernames: [...usernames]
             })
-            .catch(error => {
-                console.log(error)
-            })
+        })
     }
 }
