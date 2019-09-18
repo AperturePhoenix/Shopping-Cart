@@ -30,14 +30,5 @@ export default createAppContainer(
     App: appDrawer
   }, {
     initialRouteName: 'AuthLoading'
-    // defaultNavigationOptions: {
-    //   headerStyle: {
-    //     backgroundColor: '#ffd602',
-    //   },
-    //   headerTintColor: '#fff',
-    //   headerTitleStyle: {
-    //     fontWeight: 'bold',
-    //    },
-    // }
   })
 )

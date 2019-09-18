@@ -94,4 +94,34 @@ export default class FirebaseAPI {
                 console.log(error)
             })
     }
+
+    static groupExists = async(username, group, callback) => {
+        await this.db.doc(username).collection('groups').doc(group).get()
+            .then(group => {
+                callback(group.exists)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static getGroup = async(username, group, callback) => {
+        await this.doc(username).collection('groups').doc(group).get()
+            .then(groupSnapshot => {
+                callback(groupSnapshot.get('list'))
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    static addUserToGroup = async(username, group, newUser) => {
+        await this.db.doc(username).collection('groups').doc(group).get()
+            .then(group => {
+                
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
 }

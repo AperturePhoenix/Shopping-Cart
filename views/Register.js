@@ -79,9 +79,9 @@ export default class Register extends Component {
         return(
             <View style={MainContainerStyle}>
             <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
-                <Input placeholder='Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: 'red' }} errorMessage={this.state.nameError} />
-                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: 'red' }} errorMessage={this.state.usernameError} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: 'red' }} errorMessage={this.state.passwordError}/>
+                <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.nameError} />
+                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.usernameError} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.passwordError}/>
                 <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.registerAccount() } />
                 <Button title='Back' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.goBack() } />
             </KeyboardAvoidingView>
