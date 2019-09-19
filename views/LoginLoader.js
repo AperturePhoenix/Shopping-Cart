@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { View, Image, AsyncStorage } from 'react-native'
-import FirebaseAPI from './../store/FirebaseAPI'
-import { MainContainerStyle, ChildContainerStyle } from './../store/Styler'
+import { View, Image } from 'react-native'
+import FirebaseAPI from '../store/FirebaseAPI'
+import { MainContainerStyle, ChildContainerStyle } from '../store/Styler'
 
 export default class LoginLoader extends Component {
     componentWillMount() {
@@ -9,10 +9,10 @@ export default class LoginLoader extends Component {
     }
 
     componentDidMount() {
-        this.bootstrapAsync()
+        this.bootstrap()
     }
 
-    bootstrapAsync = () => {
+    bootstrap = () => {
         FirebaseAPI.loadAsyncStorage()
             .then(success => {
                 this.props.navigation.navigate(success ? 'App' : 'Auth')

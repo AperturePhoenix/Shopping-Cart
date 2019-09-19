@@ -19,3 +19,7 @@ export const TextHeaderStyle={
 export const ButtonTextStyle={
     color: '#6db105'
 }
+
+export const ErrorStyle={
+    color: '#f5624b'
+}

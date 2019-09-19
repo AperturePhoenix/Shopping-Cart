@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import { View, KeyboardAvoidingView, Alert, Image, Text } from 'react-native'
 import { Button, Input } from 'react-native-elements'
-import FirebaseAPI from './../store/FirebaseAPI'
-import base64 from 'react-native-base64'
-import { MainContainerStyle, ChildContainerStyle, TextHeaderStyle, ButtonTextStyle } from './../store/Styler'
+import FirebaseAPI from '../store/FirebaseAPI'
+import { MainContainerStyle, ChildContainerStyle, TextHeaderStyle, ButtonTextStyle, ErrorStyle } from '../store/Styler'
 
 export default class Login extends Component {
     static navigationOptions = {
@@ -63,8 +62,8 @@ export default class Login extends Component {
                 <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
                     <Image source={require('../assets/Starfruit.png')} style={{width: 200, height: 200, marginBottom: 10 }} />
                     <Text style={ TextHeaderStyle } >Shopping Cart</Text>
-                    <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.usernameError} />
-                    <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.passwordError} />
+                    <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={ErrorStyle} errorMessage={this.state.usernameError} />
+                    <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={ErrorStyle} errorMessage={this.state.passwordError} />
                     <Button title='Sign In' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.logIn() } />
                     <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.navigate('Register') } />
                 </KeyboardAvoidingView>

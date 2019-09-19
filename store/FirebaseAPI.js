@@ -26,11 +26,10 @@ export default class FirebaseAPI {
                 AsyncStorage.getItem('username'),
                 AsyncStorage.getItem('password')
             ]).then(array => {
-                this.name = array[0]
+                this.nickname = array[0]
                 this.username = array[1]
                 this.encodedPassword = array[2]
-                console.log(array)
-                resolve(this.name !== null && this.username !== null && this.encodedPassword !== null)
+                resolve(this.nickname !== null && this.username !== null && this.encodedPassword !== null)
             }).catch(error => {
                 reject(error)
             })
@@ -38,7 +37,7 @@ export default class FirebaseAPI {
     }
 
     static saveAsyncStorage = (name, username, encodedPassword) => {
-        this.name = name
+        this.nickname = name
         AsyncStorage.setItem('name', name)
         this.username = username
         AsyncStorage.setItem('username', this.username)
@@ -66,9 +65,29 @@ export default class FirebaseAPI {
                         Promise.all([this.getField(username, 'name'), this.getField(username, 'password')])
                             .then(array => {
                                 this.saveAsyncStorage(array[0], username, array[1])
-                                console.log(array[0] + ' ' + array[1])
                                 resolve(base64.encode(password) === array[1])
                             })
+                    } else {
+                        resolve(false)
+                    }
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    }
+
+    static register = (name, username, password) => {
+        return new Promise((resolve, reject) => {
+            this.usernameExists(username)
+                .then(exists => {
+                    if (!exists) {
+                        this.setFields(username, {
+                            name: name,
+                            password: base64.encode(password)
+                        })
+                        this.saveAsyncStorage(name, username, base64.encode(password))
+                        resolve(true)
                     } else {
                         resolve(false)
                     }
@@ -91,8 +110,8 @@ export default class FirebaseAPI {
         })
     }
 
-    static setFields = async(username, fields) => {
-        await this.db.doc(username).set(fields)
+    static setFields = (username, fields) => {
+        this.db.doc(username).set(fields)
             .catch(error => {
                 console.log(error)
             })

@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import { View, KeyboardAvoidingView, AsyncStorage, Alert } from 'react-native'
+import { View, KeyboardAvoidingView, Alert } from 'react-native'
 import { Button, Input } from 'react-native-elements'
-import FirebaseAPI from './../store/FirebaseAPI'
-import base64 from 'react-native-base64'
-import { MainContainerStyle, ChildContainerStyle, ButtonTextStyle } from './../store/Styler'
+import FirebaseAPI from '../store/FirebaseAPI'
+import { MainContainerStyle, ChildContainerStyle, ButtonTextStyle, ErrorStyle } from '../store/Styler'
 
 export default class Register extends Component {
     static navigationOptions = {
@@ -24,25 +23,18 @@ export default class Register extends Component {
 
     registerAccount = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.usernameExists(this.state.username, (exists) => {
-                if (!exists) {
-                    this._setLoginData()
-                    this.props.navigation.navigate('App')
-                } else {
-                    Alert.alert(title='Error', message='username is already taken')
-                }
-            })
+            FirebaseAPI.register(this.state.name, this.state.username, this.state.password)
+                .then(success => {
+                    if (success) {
+                        this.props.navigation.navigate('App')
+                    } else {
+                        Alert.alert(title='Error', message='username is already taken')
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         }
-    }
-
-    _setLoginData = async() => {
-        await AsyncStorage.setItem('username', this.state.username)
-        FirebaseAPI.setFields(this.state.username, {
-            name: this.state.name,
-            password: base64.encode(this.state.password)
-        })
-        await AsyncStorage.setItem('name', this.state.name)
-        await AsyncStorage.setItem('password', base64.encode(this.state.password))
     }
 
     validateInformation = () => {
@@ -79,9 +71,9 @@ export default class Register extends Component {
         return(
             <View style={MainContainerStyle}>
             <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
-                <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.nameError} />
-                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.usernameError} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.passwordError}/>
+                <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={ErrorStyle} errorMessage={this.state.nameError} />
+                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={ErrorStyle} errorMessage={this.state.usernameError} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={ErrorStyle} errorMessage={this.state.passwordError}/>
                 <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.registerAccount() } />
                 <Button title='Back' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.goBack() } />
             </KeyboardAvoidingView>

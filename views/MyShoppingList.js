@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, AsyncStorage, StyleSheet, FlatList, Alert } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
-import FirebaseAPI from './../store/FirebaseAPI'
+import FirebaseAPI from '../store/FirebaseAPI'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -93,7 +93,7 @@ export default class MyShoppingList extends Component {
                     rightComponent={<Button icon={<Icon name='add' color='white' />} type='clear' onPress={() => this.addItem()} />}
                     backgroundColor='#ffd602'
                 />
-                <Button title='Reset Data' onPress= { AsyncStorage.clear } />
+                <Button title='Reset Data' onPress= { () => this.reset() } />
                 <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
                 <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
                 <FlatList
