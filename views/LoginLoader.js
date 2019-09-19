@@ -17,9 +17,7 @@ export default class LoginLoader extends Component {
             .then(success => {
                 this.props.navigation.navigate(success ? 'App' : 'Auth')
             })
-            .catch(error => {
-                console.log(error)
-            })
+            .catch(error => { console.log(error) })
     }
 
     render() {

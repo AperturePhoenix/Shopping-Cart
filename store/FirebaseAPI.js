@@ -30,9 +30,7 @@ export default class FirebaseAPI {
                 this.username = array[1]
                 this.encodedPassword = array[2]
                 resolve(this.nickname !== null && this.username !== null && this.encodedPassword !== null)
-            }).catch(error => {
-                reject(error)
-            })
+            }).catch(error => { reject(error) })
         })
     }
 
@@ -51,9 +49,7 @@ export default class FirebaseAPI {
                 .then(user => {
                     resolve(user.exists)
                 })
-                .catch(error => {
-                    reject(error)
-                })
+                .catch(error => { reject(error) })
         })     
     }
 
@@ -71,9 +67,7 @@ export default class FirebaseAPI {
                         resolve(false)
                     }
                 })
-                .catch(error => {
-                    reject(error)
-                })
+                .catch(error => { reject(error) })
         })
     }
 
@@ -92,9 +86,7 @@ export default class FirebaseAPI {
                         resolve(false)
                     }
                 })
-                .catch(error => {
-                    reject(error)
-                })
+                .catch(error => { reject(error) })
         })
     }
 
@@ -104,61 +96,58 @@ export default class FirebaseAPI {
                 .then(userSnapshot => {
                     resolve(userSnapshot.get(field))
                 })
-                .catch(error => {
-                    reject(error)
-                })
+                .catch(error => { reject(error) })
         })
     }
 
     static setFields = (username, fields) => {
         this.db.doc(username).set(fields)
-            .catch(error => {
-                console.log(error)
-            })
+            .catch(error => { console.log(error) })
     }
 
-    static itemExists = async(username, item, callback) => {
-        await this.db.doc(username).collection('items').doc(item).get()
+    static itemExists = (username, item) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('items').doc(item).get()
             .then(item => {
-                callback(item.exists)
+                resolve(item.exists)
             })
-            .catch(error => {
-                console.log(error)
-            })
-    }
-
-    static getItems = async(username, callback) => {
-        await this.db.doc(username).collection('items').get()
-            .then(querySnapshot => {
-                items = []
-                querySnapshot.forEach(queryDocSnapshot => {
-                    items.push({name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
-                })
-                callback(items)
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    }
-
-    static addItem = async(username, item, quantity) => {
-        await this.db.doc(username).collection('items').doc(item).set({
-            quantity: quantity
+            .catch(error => { reject(error) })
         })
     }
 
-    static removeItem = async(username, item) => {
-        await this.db.doc(username).collection('items').doc(item).delete()
+    static getItems = (username) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('items').get()
+                .then(querySnapshot => {
+                    items = []
+                    querySnapshot.forEach(queryDocSnapshot => {
+                        items.push({name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
+                    })
+                    resolve(items)
+                })
+                .catch(error => { reject(error) })
+        })
     }
 
-    static getItemField = async(username, item, field, callback) => {
-        await this.db.doc(username).collection('items').doc(item)
+    static addItem = (username, item, quantity) => {
+        this.db.doc(username).collection('items').doc(item).set({
+            quantity: quantity
+        }).catch(error => { console.log(error) })
+    }
+
+    static removeItem = (username, item) => {
+        this.db.doc(username).collection('items').doc(item).delete()
+        .catch(error => { console.log(error) })
+    }
+
+    static getItemField = (username, item, field) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('items').doc(item)
             .then(itemSnapshot => {
-                callback(itemSnapshot.get(field))
+                resolve(itemSnapshot.get(field))
             })
-            .catch(error => {
-                console.log(error)
-            })
+            .catch(error => { reject(error) })
+        })
     }
 
     static groupExists = async(username, group, callback) => {

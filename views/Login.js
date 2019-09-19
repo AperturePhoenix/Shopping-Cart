@@ -50,9 +50,7 @@ export default class Login extends Component {
                         Alert.alert( message='Invalid username or password' )
                     }
                 })
-                .catch(error => {
-                    console.log(error)
-                })
+                .catch(error => { console.log(error) })
         }
     }
 

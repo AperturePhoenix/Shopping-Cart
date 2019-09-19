@@ -31,9 +31,7 @@ export default class Register extends Component {
                         Alert.alert(title='Error', message='username is already taken')
                     }
                 })
-                .catch(error => {
-                    console.log(error)
-                })
+                .catch(error => { console.log(error) })
         }
     }
 

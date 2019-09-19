@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, AsyncStorage, StyleSheet, FlatList, Alert } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Alert } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
 
@@ -11,18 +11,15 @@ export default class MyShoppingList extends Component {
     constructor(props) {
         super(props)
 
-        AsyncStorage.getItem('username')
-            .then(username => {
-                this.username = username
-                FirebaseAPI.getItems(this.username, (items) => {
-                    this.setState({ items: items})
-                })
-            })
+        this.username = FirebaseAPI.username
         this.state = {
             items: [],
             item: '', itemError: '',
             quantity: 0, quantityError: ''
         }
+        FirebaseAPI.getItems(this.username)
+            .then(items => { this.setState({ items: items }) })
+            .catch(error => { console.log(error) })
     }
 
     validateInformation = () => {
@@ -48,17 +45,19 @@ export default class MyShoppingList extends Component {
 
     addItem = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.itemExists(this.username, this.state.item, (exists) => {
-                if (!exists) {
-                    itemJoiner = [...this.state.items]
-                    itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
-                    this.setState({ items: [...itemJoiner] })
-                    FirebaseAPI.addItem(this.username, this.state.item, this.state.quantity)
-                }
-                else {
-                    Alert.alert(message='Item is already in the cart')
-                }
-            })
+            FirebaseAPI.itemExists(this.username, this.state.item)
+                .then(exists => {
+                    if (!exists) {
+                        itemJoiner = [...this.state.items]
+                        itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
+                        this.setState({ items: [...itemJoiner] })
+                        FirebaseAPI.addItem(this.username, this.state.item, this.state.quantity)
+                    }
+                    else {
+                        Alert.alert(message='Item is already in the cart')
+                    }
+                })
+                .catch(error => { console.log(error) })
         }
     }
 
