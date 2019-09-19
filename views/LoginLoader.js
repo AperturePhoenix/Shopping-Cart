@@ -9,20 +9,21 @@ export default class LoginLoader extends Component {
     }
 
     componentDidMount() {
-        this._bootstrapAsync()
+        this.bootstrapAsync()
     }
 
-    // Fetch the token from storage then navigate to our appropriate place
-    _bootstrapAsync = async() => {
-        const username = await AsyncStorage.getItem('username')
-
-        //If user is already logged in go to app else go to login screen
-        this.props.navigation.navigate(username ? 'App' : 'Auth');
+    bootstrapAsync = () => {
+        FirebaseAPI.loadAsyncStorage()
+            .then(success => {
+                this.props.navigation.navigate(success ? 'App' : 'Auth')
+            })
+            .catch(error => {
+                console.log(error)
+            })
     }
 
     render() {
         return(
-            //TODO: Loading image
             <View style={MainContainerStyle}>
                 <View style={ChildContainerStyle}>
                     <Image source={require('../assets/Starfruit.png')} style={{width: 200, height: 200 }} />

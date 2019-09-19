@@ -1,6 +1,7 @@
 import firebase from 'firebase'
 import '@firebase/firestore';
 import base64 from 'react-native-base64';
+import { AsyncStorage } from 'react-native';
 
 export default class FirebaseAPI {
     static firebaseConfig = {
@@ -18,30 +19,76 @@ export default class FirebaseAPI {
         this.db = firebase.firestore().collection('users')
     }
 
-    static usernameExists = async(username, callback) => {
-        await this.db.doc(username).get()
-            .catch (error => {
-                console.log(error)
+    static loadAsyncStorage = () => {
+        return new Promise((resolve, reject) => {
+            Promise.all([
+                AsyncStorage.getItem('name'),
+                AsyncStorage.getItem('username'),
+                AsyncStorage.getItem('password')
+            ]).then(array => {
+                this.name = array[0]
+                this.username = array[1]
+                this.encodedPassword = array[2]
+                console.log(array)
+                resolve(this.name !== null && this.username !== null && this.encodedPassword !== null)
+            }).catch(error => {
+                reject(error)
             })
-            .then (user => {
-                callback(user.exists)
-            })     
-    }
-
-    static login = async(username, password, callback) => {
-        await this.getField(username, 'password', (encodedPassword) => {
-            callback(base64.encode(password) == encodedPassword)
         })
     }
 
-    static getField = async(username, field, callback) => {
-        await this.db.doc(username).get()
-            .then(userSnapshot => {
-                callback(userSnapshot.get(field))
-            })
-            .catch (error => {
-                console.log(error)
-            })
+    static saveAsyncStorage = (name, username, encodedPassword) => {
+        this.name = name
+        AsyncStorage.setItem('name', name)
+        this.username = username
+        AsyncStorage.setItem('username', this.username)
+        this.encodedPassword = encodedPassword
+        AsyncStorage.setItem('password', encodedPassword)
+    }
+
+    static usernameExists = (username) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).get()
+                .then(user => {
+                    resolve(user.exists)
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })     
+    }
+
+    static login = (username, password) => {
+        return new Promise((resolve, reject) => {
+            this.usernameExists(username)
+                .then(exists => {
+                    if (exists) {
+                        Promise.all([this.getField(username, 'name'), this.getField(username, 'password')])
+                            .then(array => {
+                                this.saveAsyncStorage(array[0], username, array[1])
+                                console.log(array[0] + ' ' + array[1])
+                                resolve(base64.encode(password) === array[1])
+                            })
+                    } else {
+                        resolve(false)
+                    }
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
+    }
+
+    static getField = (username, field) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).get()
+                .then(userSnapshot => {
+                    resolve(userSnapshot.get(field))
+                })
+                .catch(error => {
+                    reject(error)
+                })
+        })
     }
 
     static setFields = async(username, fields) => {

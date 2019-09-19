@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, KeyboardAvoidingView, AsyncStorage, Alert, Image, Text } from 'react-native'
+import { View, KeyboardAvoidingView, Alert, Image, Text } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import FirebaseAPI from './../store/FirebaseAPI'
 import base64 from 'react-native-base64'
@@ -43,29 +43,18 @@ export default class Login extends Component {
 
     logIn = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.usernameExists(this.state.username, (exists) => {
-                if (exists) {
-                    FirebaseAPI.login(this.state.username, this.state.password, (success) => {
-                        if (success) {
-                            this._setLoginData()
-                            this.props.navigation.navigate('App')
-                        } else {
-                            Alert.alert( message='Invalid username or password' )
-                        }
-                    })
-                } else {
-                    Alert.alert( message='Invalid username or password' )
-                }
-            })
+            FirebaseAPI.login(this.state.username, this.state.password)
+                .then(success => {
+                    if (success) {
+                        this.props.navigation.navigate('App')
+                    } else {
+                        Alert.alert( message='Invalid username or password' )
+                    }
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         }
-    }
-
-    _setLoginData = async() => {
-        await AsyncStorage.setItem('username', this.state.username)
-        FirebaseAPI.getField(this.state.username, 'name', (name) => {
-            AsyncStorage.setItem('name', name)
-        })
-        await AsyncStorage.setItem('password', base64.encode(this.state.password))
     }
 
     render() {
