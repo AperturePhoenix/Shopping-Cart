@@ -16,7 +16,7 @@ export default class MyShoppingList extends Component {
             items: [],
             item: '', itemError: '',
             quantity: 0, quantityError: '',
-            isOpen: true, offsetY: new Animated.Value(0)
+            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-160)
         }
         FirebaseAPI.getItems(this.username)
             .then(items => { this.setState({ items: items }) })
@@ -80,21 +80,28 @@ export default class MyShoppingList extends Component {
     }
 
     toggleAddItem() {
-        console.log("TRYING TO DO STUFF" + this.state.isOpen)
-        if (this.state.isOpen) {
-            
+        console.log("TRYING TO DO STUFF" + this.state.itemViewIsOpen)
+        if (this.state.itemViewIsOpen) {
             Animated.timing(
-                this.state.offsetY,
-                { toValue: -225 }
-              ).start();
+                this.state.itemViewOffsetY,
+                { toValue: -222 }
+            ).start();
+            Animated.timing(
+                this.state.listViewOffsetY,
+                { toValue: -160 }
+            ).start()
         } else {
             Animated.timing(
-                this.state.offsetY,
+                this.state.itemViewOffsetY,
                 { toValue: 0 }
-              ).start();
+            ).start();
+            Animated.timing(
+                this.state.listViewOffsetY,
+                { toValue: 0 }
+            ).start()
         }
 
-        this.setState({ isOpen: !this.state.isOpen })
+        this.setState({ itemViewIsOpen: !this.state.itemViewIsOpen })
     }
 
     toggleDrawer = () => {
@@ -114,22 +121,24 @@ export default class MyShoppingList extends Component {
                     />
                 </View>
 
-                <Animated.View style={{ transform: [{translateY: this.state.offsetY}] }} >
-                    <View pointerEvents={!this.state.isOpen ? 'none' : 'auto'}>
+                <Animated.View style={{ transform: [{translateY: this.state.itemViewOffsetY}] }} >
+                    <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'}>
                         <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
                         <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
                         <Button title='Add' onPress={ () => this.addItem() } />
                         <Button title='Close' onPress= { () => this.toggleAddItem() } />
                     </View>
                 </Animated.View>
-
-                <FlatList
-                    data={ this.state.items }
-                    renderItem={ ({ item }) => (
-                        <Text onPress={ this.removeItem.bind(this, item.name ) }>{item.name}: {item.quantity}</Text> 
-                    )}
-                    keyExtractor={ (index) => index.toString() }
-                />
+                
+                <Animated.View style={{ transform: [{translateY: this.state.listViewOffsetY}] }} >
+                    <FlatList
+                        data={ this.state.items }
+                        renderItem={ ({ item }) => (
+                            <Text onPress={ this.removeItem.bind(this, item.name ) }>{item.name}: {item.quantity}</Text> 
+                        )}
+                        keyExtractor={ (index) => index.toString() }
+                    />
+                </Animated.View>
             </View>
         )
     }
