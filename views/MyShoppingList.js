@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet, FlatList, Alert, Animated, TouchableOpacity } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
-import { ButtonTextStyle, ListTextStyle, ListSubtleStyle, ListSeparatorStyle, MainContainerStyle } from '../store/Styler'
+import { ButtonTextStyle, ListTextStyle, ListSubtleStyle, ListSeparatorStyle, MainContainerStyle, ItemInputContainerStyle, ItemInputTextStyle } from '../store/Styler'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -17,7 +17,8 @@ export default class MyShoppingList extends Component {
             items: [],
             item: '', itemError: '',
             quantity: 0, quantityError: '',
-            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-500)
+            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-500),
+            itemViewIcon: <Icon name='add' color='white' />
         }
         FirebaseAPI.getItems(this.username)
             .then(items => { this.setState({ items: items }) })
@@ -85,7 +86,11 @@ export default class MyShoppingList extends Component {
         this.setState({
             itemViewHeight: height
         })
-        this.state.listViewOffsetY.setValue(-height)
+        if (this.state.itemViewIsOpen) {
+            this.state.listViewOffsetY.setValue(0)
+        } else {
+            this.state.listViewOffsetY.setValue(-height)
+        }
     }
 
     toggleAddItem() {
@@ -98,6 +103,9 @@ export default class MyShoppingList extends Component {
                 this.state.listViewOffsetY,
                 { toValue: -(this.state.itemViewHeight) }
             ).start()
+            this.setState({
+                itemViewIcon: <Icon name='add' color='white' />
+            })
         } else {
             Animated.timing(
                 this.state.itemViewOffsetY,
@@ -107,8 +115,10 @@ export default class MyShoppingList extends Component {
                 this.state.listViewOffsetY,
                 { toValue: 0 }
             ).start()
+            this.setState({
+                itemViewIcon: <Icon name='remove' color='white' />
+            })
         }
-
         this.setState({ itemViewIsOpen: !this.state.itemViewIsOpen })
     }
 
@@ -124,15 +134,15 @@ export default class MyShoppingList extends Component {
                         placement='left'
                         leftComponent={<Button icon={<Icon name='menu' color='white' />} type='clear' onPress={() => this.toggleDrawer()} />}
                         centerComponent={{ text: 'My Shopping List', style: { color: '#fff', fontSize: 24 } }}
-                        rightComponent={<Button icon={<Icon name='add' color='white' />} type='clear' onPress={() => this.toggleAddItem() } />}
+                        rightComponent={<Button icon={this.state.itemViewIcon} type='clear' onPress={() => this.toggleAddItem() } />}
                         backgroundColor='#ffd602'
                     />
                 </View>
 
-                <Animated.View style={{ backgroundColor: '#eee', transform: [{translateY: this.state.itemViewOffsetY}] }} >
+                <Animated.View style={{ backgroundColor: '#ff947d', transform: [{translateY: this.state.itemViewOffsetY}] }} >
                     <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
-                        <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
-                        <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
+                        <Input placeholder='Item' inputStyle={ItemInputTextStyle} placeholderTextColor='#eee' inputContainerStyle={ItemInputContainerStyle} onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
+                        <Input placeholder='Quantity' inputStyle={ItemInputTextStyle} placeholderTextColor='#eee' inputContainerStyle={ItemInputContainerStyle} onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
                         <Button title='Add' titleStyle={ButtonTextStyle} type='clear' onPress={ () => this.addItem() } />
                     </View>
                 </Animated.View>

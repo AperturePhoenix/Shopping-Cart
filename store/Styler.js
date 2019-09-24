@@ -12,6 +12,15 @@ export const ChildContainerStyle={
     alignItems: 'center'
 }
 
+export const ItemInputTextStyle={
+    color: '#fff',
+    fontSize: 20
+}
+
+export const ItemInputContainerStyle={
+    borderColor: '#fff'
+}
+
 export const TextHeaderStyle={
     fontSize: 25
 }
