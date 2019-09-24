@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, FlatList, Alert } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Alert, Animated } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
 
@@ -15,7 +15,8 @@ export default class MyShoppingList extends Component {
         this.state = {
             items: [],
             item: '', itemError: '',
-            quantity: 0, quantityError: ''
+            quantity: 0, quantityError: '',
+            isOpen: true, offsetY: new Animated.Value(0)
         }
         FirebaseAPI.getItems(this.username)
             .then(items => { this.setState({ items: items }) })
@@ -78,6 +79,24 @@ export default class MyShoppingList extends Component {
         await AsyncStorage.clear()
     }
 
+    toggleAddItem() {
+        console.log("TRYING TO DO STUFF" + this.state.isOpen)
+        if (this.state.isOpen) {
+            
+            Animated.timing(
+                this.state.offsetY,
+                { toValue: -225 }
+              ).start();
+        } else {
+            Animated.timing(
+                this.state.offsetY,
+                { toValue: 0 }
+              ).start();
+        }
+
+        this.setState({ isOpen: !this.state.isOpen })
+    }
+
     toggleDrawer = () => {
         this.props.navigation.toggleDrawer();
     }
@@ -85,16 +104,25 @@ export default class MyShoppingList extends Component {
     render() {
         return (
             <View style={ styles.MainContainer }>
-                <Header
-                    placement='left'
-                    leftComponent={<Button icon={<Icon name='menu' color='white' />} type='clear' onPress={() => this.toggleDrawer()} />}
-                    centerComponent={{ text: 'My Shopping List', style: { color: '#fff', fontSize: 24 } }}
-                    rightComponent={<Button icon={<Icon name='add' color='white' />} type='clear' onPress={() => this.addItem()} />}
-                    backgroundColor='#ffd602'
-                />
-                <Button title='Reset Data' onPress= { () => this.reset() } />
-                <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
-                <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
+                <View style={{ elevation: 100, zIndex: 100 }} >
+                    <Header
+                        placement='left'
+                        leftComponent={<Button icon={<Icon name='menu' color='white' />} type='clear' onPress={() => this.toggleDrawer()} />}
+                        centerComponent={{ text: 'My Shopping List', style: { color: '#fff', fontSize: 24 } }}
+                        rightComponent={<Button icon={<Icon name='add' color='white' />} type='clear' onPress={() => this.toggleAddItem() } />}
+                        backgroundColor='#ffd602'
+                    />
+                </View>
+
+                <Animated.View style={{ transform: [{translateY: this.state.offsetY}] }} >
+                    <View pointerEvents={!this.state.isOpen ? 'none' : 'auto'}>
+                        <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
+                        <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
+                        <Button title='Add' onPress={ () => this.addItem() } />
+                        <Button title='Close' onPress= { () => this.toggleAddItem() } />
+                    </View>
+                </Animated.View>
+
                 <FlatList
                     data={ this.state.items }
                     renderItem={ ({ item }) => (
