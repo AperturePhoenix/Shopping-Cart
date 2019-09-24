@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet, FlatList, Alert, Animated } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
+import { ButtonTextStyle } from '../store/Styler'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -16,7 +17,7 @@ export default class MyShoppingList extends Component {
             items: [],
             item: '', itemError: '',
             quantity: 0, quantityError: '',
-            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-160)
+            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-500)
         }
         FirebaseAPI.getItems(this.username)
             .then(items => { this.setState({ items: items }) })
@@ -79,16 +80,23 @@ export default class MyShoppingList extends Component {
         await AsyncStorage.clear()
     }
 
+    setItemViewLayout = (event) => {
+        let {x, y, width, height} = event.nativeEvent.layout
+        this.setState({
+            itemViewHeight: height
+        })
+        this.state.listViewOffsetY.setValue(-height)
+    }
+
     toggleAddItem() {
-        console.log("TRYING TO DO STUFF" + this.state.itemViewIsOpen)
         if (this.state.itemViewIsOpen) {
             Animated.timing(
                 this.state.itemViewOffsetY,
-                { toValue: -222 }
+                { toValue: -(this.state.itemViewHeight + 40) }
             ).start();
             Animated.timing(
                 this.state.listViewOffsetY,
-                { toValue: -160 }
+                { toValue: -(this.state.itemViewHeight) }
             ).start()
         } else {
             Animated.timing(
@@ -122,11 +130,10 @@ export default class MyShoppingList extends Component {
                 </View>
 
                 <Animated.View style={{ transform: [{translateY: this.state.itemViewOffsetY}] }} >
-                    <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'}>
+                    <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
                         <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
                         <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
-                        <Button title='Add' onPress={ () => this.addItem() } />
-                        <Button title='Close' onPress= { () => this.toggleAddItem() } />
+                        <Button title='Add' titleStyle={ButtonTextStyle} type='clear' onPress={ () => this.addItem() } />
                     </View>
                 </Animated.View>
                 
