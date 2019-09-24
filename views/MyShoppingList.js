@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, FlatList, Alert, Animated } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Alert, Animated, TouchableOpacity } from 'react-native'
 import { Button, Input, Header, Icon } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
-import { ButtonTextStyle } from '../store/Styler'
+import { ButtonTextStyle, ListTextStyle, ListSubtleStyle, ListSeparatorStyle, MainContainerStyle } from '../store/Styler'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -118,7 +118,7 @@ export default class MyShoppingList extends Component {
 
     render() {
         return (
-            <View style={ styles.MainContainer }>
+            <View style={MainContainerStyle}>
                 <View style={{ elevation: 100, zIndex: 100 }} >
                     <Header
                         placement='left'
@@ -129,7 +129,7 @@ export default class MyShoppingList extends Component {
                     />
                 </View>
 
-                <Animated.View style={{ transform: [{translateY: this.state.itemViewOffsetY}] }} >
+                <Animated.View style={{ backgroundColor: '#eee', transform: [{translateY: this.state.itemViewOffsetY}] }} >
                     <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
                         <Input placeholder='Item' onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
                         <Input placeholder='Quantity' onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
@@ -140,8 +140,14 @@ export default class MyShoppingList extends Component {
                 <Animated.View style={{ transform: [{translateY: this.state.listViewOffsetY}] }} >
                     <FlatList
                         data={ this.state.items }
+                        ItemSeparatorComponent={ () => (
+                            <View style={ListSeparatorStyle} />
+                        )}
                         renderItem={ ({ item }) => (
-                            <Text onPress={ this.removeItem.bind(this, item.name ) }>{item.name}: {item.quantity}</Text> 
+                            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.removeItem.bind(this, item.name ) }>
+                                <Text style={ListTextStyle}>{item.name}</Text> 
+                                <Text style={ListSubtleStyle}>{item.quantity}</Text>
+                            </TouchableOpacity>
                         )}
                         keyExtractor={ (index) => index.toString() }
                     />
@@ -150,10 +156,3 @@ export default class MyShoppingList extends Component {
         )
     }
 }
-
-const styles=StyleSheet.create({
-    MainContainer: {
-        flex: 1,
-        flexDirection: 'column'
-    }
-})
