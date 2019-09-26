@@ -16,6 +16,10 @@ export const ChildContainerStyle={
 }
 
 export const HeaderStyle={
+    ZPosition:{
+        elevation: 100,
+        zIndex: 100
+    },
     Menu:{
         Icon: <Icon name='menu' color='white' />,
         Type: 'clear'
@@ -46,11 +50,13 @@ export const DropDownStyle={
     Error:{
         color: '#f5624b'
     },
-    ButtonTitle: {
-        color: '#fff',
-        fontSize: 20
-    },
-    ButtonType: 'clear'
+    Button:{
+        Title:{
+            color: '#fff',
+            fontSize: 20
+        },
+        Type: 'clear'
+    }
 }
 
 export const TextHeaderStyle={

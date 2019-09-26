@@ -81,7 +81,7 @@ export default class MyShoppingList extends Component {
             this.state.itemViewOffsetY.setValue(0)
             this.state.listViewOffsetY.setValue(0)
         } else {
-            this.state.itemViewOffsetY.setValue(-(height + 40))
+            this.state.itemViewOffsetY.setValue(-(height + 55))
             this.state.listViewOffsetY.setValue(-height)
         }
     }
@@ -91,7 +91,7 @@ export default class MyShoppingList extends Component {
             Animated.parallel([
                 Animated.timing(
                     this.state.itemViewOffsetY,
-                    { toValue: -(this.state.itemViewHeight + 40) }
+                    { toValue: -(this.state.itemViewHeight + 55) }
                 ),
                 Animated.timing(
                     this.state.listViewOffsetY,
@@ -128,7 +128,7 @@ export default class MyShoppingList extends Component {
     render() {
         return (
             <View style={MainContainerStyle}>
-                <View style={{ elevation: 100, zIndex: 100 }} >
+                <View style={HeaderStyle.ZPosition} >
                     <Header
                         placement='left'
                         leftComponent={<Button icon={HeaderStyle.Menu.Icon} type={HeaderStyle.Menu.Type} onPress={() => this.toggleDrawer()} />}
@@ -142,7 +142,7 @@ export default class MyShoppingList extends Component {
                     <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
                         <Input placeholder='Item' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorMessage={this.state.itemError} />
                         <Input placeholder='Quantity' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorStyle={DropDownStyle.Error} errorMessage={this.state.quantityError} />
-                        <Button title='Add' titleStyle={DropDownStyle.ButtonTitle} type={DropDownStyle.ButtonType} onPress={ () => this.addItem() } />
+                        <Button title='Add' titleStyle={DropDownStyle.Button.Title} type={DropDownStyle.Button.Type} onPress={ () => this.addItem() } />
                     </View>
                 </Animated.View>
                 
