@@ -150,47 +150,52 @@ export default class FirebaseAPI {
         })
     }
 
-    static groupExists = async(username, group, callback) => {
-        await this.db.doc(username).collection('groups').doc(group).get()
-            .then(group => {
-                callback(group.exists)
+    static groupExists = (username, group) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('groups').doc(group).get()
+                .then(group => {
+                    resolve(group.exists)
             })
-            .catch(error => {
-                console.log(error)
-            })
+            .catch(error => { reject(error) })
+        })
     }
 
-    static getGroupList = async(username, callback) => {
-        await this.db.doc(username).collection('groups').get()
-            .then(groupSnapshot => {
-                groups = []
-                groupSnapshot.forEach(groupDocSnapshot => {
-                    groups.push({name: groupDocSnapshot.id, usernames: groupDocSnapshot.get('usernames')})
+    static getGroupList = (username) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('groups').get()
+                .then(groupSnapshot => {
+                    groups = []
+                    groupSnapshot.forEach(groupDocSnapshot => {
+                        groups.push({name: groupDocSnapshot.id, usernames: groupDocSnapshot.get('usernames')})
+                    })
+                resolve(groups)
+            })
+            .catch(error => { reject(error) })
+        })
+    }
+
+    static getGroupUsernames = (username, group) => {
+        return new Promise((resolve, reject) => {
+            this.db.doc(username).collection('groups').doc(group).get()
+                .then(groupSnapshot => {
+                    resolve(groupSnapshot.get('usernames'))
+            })
+            .catch(error => { reject(error) })
+        })
+    }
+
+    static addUserToGroup = (username, group, newUser) => {
+        return new Promise((resolve, reject) => {
+            this.getGroupUsernames(username, group) 
+            .then(usernames => {
+                if (usernames === undefined) usernames = []
+                usernames.push(newUser)
+                this.db.doc(username).collection('groups').doc(group).set({
+                    usernames: [...usernames]
                 })
-                callback(groups)
+                resolve(usernames)
             })
-            .catch(error => {
-                console.log(error)
-            })
-    }
-
-    static getGroupUsernames = async(username, group, callback) => {
-        await this.db.doc(username).collection('groups').doc(group).get()
-            .then(groupSnapshot => {
-                callback(groupSnapshot.get('usernames'))
-            })
-            .catch(error => {
-                console.log(error)
-            })
-    }
-
-    static addUserToGroup = async(username, group, newUser) => {
-        this.getGroupUsernames(username, group, usernames => {
-            if (usernames === undefined) usernames = []
-            usernames.push(newUser)
-            this.db.doc(username).collection('groups').doc(group).set({
-                usernames: [...usernames]
-            })
+            .catch(error => { reject(error) })
         })
     }
 }

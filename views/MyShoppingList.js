@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, StyleSheet, FlatList, Alert, Animated, TouchableOpacity } from 'react-native'
-import { Button, Input, Header, Icon } from 'react-native-elements'
+import { View, Text, FlatList, Alert, Animated, TouchableOpacity } from 'react-native'
+import { Button, Input, Header } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
-import { ButtonTextStyle, ListTextStyle, ListSubtleStyle, ListSeparatorStyle, MainContainerStyle, ItemInputContainerStyle, ItemInputTextStyle } from '../store/Styler'
+import { MainContainerStyle, DropDownStyle, FlatListStyle, HeaderStyle } from '../store/Styler'
 
 export default class MyShoppingList extends Component {
     static navigationOptions = {
@@ -17,8 +17,8 @@ export default class MyShoppingList extends Component {
             items: [],
             item: '', itemError: '',
             quantity: 0, quantityError: '',
-            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-222), listViewOffsetY: new Animated.Value(-500),
-            itemViewIcon: <Icon name='add' color='white' />
+            itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-500), listViewOffsetY: new Animated.Value(-500),
+            itemViewIcon: HeaderStyle.Add.Icon
         }
         FirebaseAPI.getItems(this.username)
             .then(items => { this.setState({ items: items }) })
@@ -26,7 +26,7 @@ export default class MyShoppingList extends Component {
     }
 
     validateInformation = () => {
-        isValid = true
+        let isValid = true
         if (!this.state.item) {
             this.setState({ itemError: 'Please enter an item'})
             isValid=false
@@ -72,51 +72,50 @@ export default class MyShoppingList extends Component {
         FirebaseAPI.removeItem(this.username, item)
     }
 
-    reset = () => {
-        this._clearData()
-        this.props.navigation.navigate('App')
-    }
-
-    _clearData = async() => {
-        await AsyncStorage.clear()
-    }
-
     setItemViewLayout = (event) => {
-        let {x, y, width, height} = event.nativeEvent.layout
+        let { height } = event.nativeEvent.layout
         this.setState({
             itemViewHeight: height
         })
         if (this.state.itemViewIsOpen) {
+            this.state.itemViewOffsetY.setValue(0)
             this.state.listViewOffsetY.setValue(0)
         } else {
+            this.state.itemViewOffsetY.setValue(-(height + 40))
             this.state.listViewOffsetY.setValue(-height)
         }
     }
 
     toggleAddItem() {
         if (this.state.itemViewIsOpen) {
-            Animated.timing(
-                this.state.itemViewOffsetY,
-                { toValue: -(this.state.itemViewHeight + 40) }
-            ).start();
-            Animated.timing(
-                this.state.listViewOffsetY,
-                { toValue: -(this.state.itemViewHeight) }
-            ).start()
+            Animated.parallel([
+                Animated.timing(
+                    this.state.itemViewOffsetY,
+                    { toValue: -(this.state.itemViewHeight + 40) }
+                ),
+                Animated.timing(
+                    this.state.listViewOffsetY,
+                    { toValue: -(this.state.itemViewHeight) }
+                )
+            ]).start()
+            
             this.setState({
-                itemViewIcon: <Icon name='add' color='white' />
+                itemViewIcon: HeaderStyle.Add.Icon
             })
         } else {
-            Animated.timing(
-                this.state.itemViewOffsetY,
-                { toValue: 0 }
-            ).start();
-            Animated.timing(
-                this.state.listViewOffsetY,
-                { toValue: 0 }
-            ).start()
+            Animated.parallel([
+                Animated.timing(
+                    this.state.itemViewOffsetY,
+                    { toValue: 0 }
+                ),
+                Animated.timing(
+                    this.state.listViewOffsetY,
+                    { toValue: 0 }
+                )
+            ]).start()
+            
             this.setState({
-                itemViewIcon: <Icon name='remove' color='white' />
+                itemViewIcon: HeaderStyle.Remove.Icon
             })
         }
         this.setState({ itemViewIsOpen: !this.state.itemViewIsOpen })
@@ -132,18 +131,18 @@ export default class MyShoppingList extends Component {
                 <View style={{ elevation: 100, zIndex: 100 }} >
                     <Header
                         placement='left'
-                        leftComponent={<Button icon={<Icon name='menu' color='white' />} type='clear' onPress={() => this.toggleDrawer()} />}
-                        centerComponent={{ text: 'My Shopping List', style: { color: '#fff', fontSize: 24 } }}
+                        leftComponent={<Button icon={HeaderStyle.Menu.Icon} type={HeaderStyle.Menu.Type} onPress={() => this.toggleDrawer()} />}
+                        centerComponent={{ text: 'My Shopping List', style: HeaderStyle.Text }}
                         rightComponent={<Button icon={this.state.itemViewIcon} type='clear' onPress={() => this.toggleAddItem() } />}
-                        backgroundColor='#ffd602'
+                        backgroundColor={HeaderStyle.BackgroundColor}
                     />
                 </View>
 
-                <Animated.View style={{ backgroundColor: '#ff947d', transform: [{translateY: this.state.itemViewOffsetY}] }} >
+                <Animated.View style={{ backgroundColor: DropDownStyle.BackgroundColor, transform: [{translateY: this.state.itemViewOffsetY}] }} >
                     <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
-                        <Input placeholder='Item' inputStyle={ItemInputTextStyle} placeholderTextColor='#eee' inputContainerStyle={ItemInputContainerStyle} onChangeText={ item => {this.setState({ item: item})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.itemError} />
-                        <Input placeholder='Quantity' inputStyle={ItemInputTextStyle} placeholderTextColor='#eee' inputContainerStyle={ItemInputContainerStyle} onChangeText={ quantity => {this.setState({ quantity: quantity})}} errorStyle={{ color: '#f5624b' }} errorMessage={this.state.quantityError} />
-                        <Button title='Add' titleStyle={ButtonTextStyle} type='clear' onPress={ () => this.addItem() } />
+                        <Input placeholder='Item' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorMessage={this.state.itemError} />
+                        <Input placeholder='Quantity' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorStyle={DropDownStyle.Error} errorMessage={this.state.quantityError} />
+                        <Button title='Add' titleStyle={DropDownStyle.ButtonTitle} type={DropDownStyle.ButtonType} onPress={ () => this.addItem() } />
                     </View>
                 </Animated.View>
                 
@@ -151,12 +150,12 @@ export default class MyShoppingList extends Component {
                     <FlatList
                         data={ this.state.items }
                         ItemSeparatorComponent={ () => (
-                            <View style={ListSeparatorStyle} />
+                            <View style={FlatListStyle.Separator} />
                         )}
                         renderItem={ ({ item }) => (
                             <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.removeItem.bind(this, item.name ) }>
-                                <Text style={ListTextStyle}>{item.name}</Text> 
-                                <Text style={ListSubtleStyle}>{item.quantity}</Text>
+                                <Text style={FlatListStyle.Text}>{item.name}</Text> 
+                                <Text style={FlatListStyle.Subtle}>{item.quantity}</Text>
                             </TouchableOpacity>
                         )}
                         keyExtractor={ (index) => index.toString() }
