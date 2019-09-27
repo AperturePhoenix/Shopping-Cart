@@ -141,7 +141,7 @@ export default class MyShoppingList extends Component {
                 <Animated.View style={{ backgroundColor: DropDownStyle.BackgroundColor, transform: [{translateY: this.state.itemViewOffsetY}] }} >
                     <View pointerEvents={!this.state.itemViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setItemViewLayout(event) } >
                         <Input placeholder='Item' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorMessage={this.state.itemError} />
-                        <Input placeholder='Quantity' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ item => this.setState({ item: item})} errorStyle={DropDownStyle.Error} errorStyle={DropDownStyle.Error} errorMessage={this.state.quantityError} />
+                        <Input placeholder='Quantity' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={ quantity => this.setState({ quantity: quantity})} errorStyle={DropDownStyle.Error} errorStyle={DropDownStyle.Error} errorMessage={this.state.quantityError} />
                         <Button title='Add' titleStyle={DropDownStyle.Button.Title} type={DropDownStyle.Button.Type} onPress={ () => this.addItem() } />
                     </View>
                 </Animated.View>
