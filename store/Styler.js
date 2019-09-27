@@ -24,6 +24,10 @@ export const HeaderStyle={
         Icon: <Icon name='menu' color='white' />,
         Type: 'clear'
     },
+    Back:{
+        Icon: <Icon name='arrow-back' color='white' />,
+        Type: 'clear'
+    },
     Text:{
         color: '#fff',
         fontSize: 24

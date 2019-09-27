@@ -121,7 +121,7 @@ export default class FirebaseAPI {
                 .then(querySnapshot => {
                     items = []
                     querySnapshot.forEach(queryDocSnapshot => {
-                        items.push({name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
+                        items.push({username: username, name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
                     })
                     resolve(items)
                 })

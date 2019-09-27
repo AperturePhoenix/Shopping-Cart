@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import { Animated, View, FlatList, Text, Alert, TouchableOpacity } from 'react-native'
 import { Header, Button, Input } from 'react-native-elements'
+import { createStackNavigator} from 'react-navigation-stack'
 import FirebaseAPI from '../store/FirebaseAPI'
 import { MainContainerStyle, DropDownStyle, FlatListStyle, HeaderStyle } from '../store/Styler'
+import GroupList from './GroupList'
 
-export default class GroupView extends Component {
+export class GroupView extends Component {
     static navigationOptions = {
-        title: 'Groups'
+        title: 'Groups',
     }
 
     constructor(props) {
@@ -27,12 +29,23 @@ export default class GroupView extends Component {
 
     validateInformation = () => {
         isValid = true
-        //insert logic
+        if (!this.state.groupName) {
+            this.setState({ groupNameError: 'Please enter a name' })
+            isValid = false
+        } else {
+            this.setState({ groupNameError: '' })
+        }
+        if (!this.state.username) {
+            this.setState({ usernameError: 'Please enter a username' })
+            isValid = false
+        } else {
+            this.setState({ usernameError: '' })
+        }
         return isValid
     }
 
     createGroup = () => {
-        if (this.validateInformation) {
+        if (this.validateInformation()) {
             FirebaseAPI.groupExists(this.username, this.state.groupName)
             .then(groupExists => {
                 if (!groupExists) {
@@ -71,6 +84,11 @@ export default class GroupView extends Component {
             this.state.groupViewOffsetY.setValue(-(height + 55))
             this.state.listViewOffsetY.setValue(-height)
         }
+    }
+
+    loadGroup = (groupName) => {
+        //Pass params
+        this.props.navigation.navigate('GroupList', {groupName: groupName})
     }
 
     removeGroup = (group) => {
@@ -144,7 +162,7 @@ export default class GroupView extends Component {
                                 <View style={FlatListStyle.Separator} />
                             )}
                         renderItem={ ({ item }) => (
-                            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.removeGroup.bind(this, item.name ) } >
+                            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.loadGroup.bind(this, item.name ) } >
                                 <Text style={FlatListStyle.Text}>{item.name}</Text>
                             </TouchableOpacity>
                         )}
@@ -155,3 +173,13 @@ export default class GroupView extends Component {
         )
     }
 }
+
+export default createStackNavigator({ 
+    Groups: GroupView, 
+    GroupList: GroupList 
+    }, {
+    initialRouteName: 'Groups',
+    defaultNavigationOptions: {
+        header: null
+    }
+})
