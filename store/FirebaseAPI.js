@@ -1,7 +1,5 @@
 import firebase from 'firebase'
-import '@firebase/firestore';
-import base64 from 'react-native-base64';
-import { AsyncStorage } from 'react-native';
+import '@firebase/firestore'
 
 export default class FirebaseAPI {
     static firebaseConfig = {
@@ -17,77 +15,19 @@ export default class FirebaseAPI {
     static initializeApp = () => {
         firebase.initializeApp(this.firebaseConfig)
         this.db = firebase.firestore().collection('users')
+        this.auth = firebase.auth()
     }
 
-    static loadAsyncStorage = () => {
-        return new Promise((resolve, reject) => {
-            Promise.all([
-                AsyncStorage.getItem('name'),
-                AsyncStorage.getItem('username'),
-                AsyncStorage.getItem('password')
-            ]).then(array => {
-                this.nickname = array[0]
-                this.username = array[1]
-                this.encodedPassword = array[2]
-                resolve(this.nickname !== null && this.username !== null && this.encodedPassword !== null)
-            }).catch(error => { reject(error) })
-        })
+    static isLoggedIn = (callback) => {
+        return this.auth.onAuthStateChanged(callback)
     }
 
-    static saveAsyncStorage = (name, username, encodedPassword) => {
-        this.nickname = name
-        AsyncStorage.setItem('name', name)
-        this.username = username
-        AsyncStorage.setItem('username', this.username)
-        this.encodedPassword = encodedPassword
-        AsyncStorage.setItem('password', encodedPassword)
+    static login = (email, password) => {
+        this.auth.signInWithEmailAndPassword(email, password)
     }
 
-    static usernameExists = (username) => {
-        return new Promise((resolve, reject) => {
-            this.db.doc(username).get()
-                .then(user => {
-                    resolve(user.exists)
-                })
-                .catch(error => { reject(error) })
-        })     
-    }
-
-    static login = (username, password) => {
-        return new Promise((resolve, reject) => {
-            this.usernameExists(username)
-                .then(exists => {
-                    if (exists) {
-                        Promise.all([this.getField(username, 'name'), this.getField(username, 'password')])
-                            .then(array => {
-                                this.saveAsyncStorage(array[0], username, array[1])
-                                resolve(base64.encode(password) === array[1])
-                            })
-                    } else {
-                        resolve(false)
-                    }
-                })
-                .catch(error => { reject(error) })
-        })
-    }
-
-    static register = (name, username, password) => {
-        return new Promise((resolve, reject) => {
-            this.usernameExists(username)
-                .then(exists => {
-                    if (!exists) {
-                        this.setFields(username, {
-                            name: name,
-                            password: base64.encode(password)
-                        })
-                        this.saveAsyncStorage(name, username, base64.encode(password))
-                        resolve(true)
-                    } else {
-                        resolve(false)
-                    }
-                })
-                .catch(error => { reject(error) })
-        })
+    static register = (name, email, password) => {
+        return this.auth.createUserWithEmailAndPassword(email, password)
     }
 
     static getField = (username, field) => {

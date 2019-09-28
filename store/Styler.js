@@ -6,13 +6,28 @@ export const MainContainerStyle={
     flex: 1
 }
 
-export const ChildContainerStyle={
-    marginHorizontal: 20,
-    marginVertical: 20,
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center'
+export const LoginStyle={
+    ChildContainer:{
+        marginHorizontal: 20,
+        marginVertical: 20,
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    Header:{
+        fontSize: 25
+    },
+    Button:{
+        Title:{
+            color: '#6db105',
+            fontSize: 20
+        },
+        Type: 'clear'
+    },
+    Error:{
+        color: '#f5624b'
+    }
 }
 
 export const HeaderStyle={
@@ -63,10 +78,6 @@ export const DropDownStyle={
     }
 }
 
-export const TextHeaderStyle={
-    fontSize: 25
-}
-
 export const FlatListStyle={
     Text:{
         fontSize: 22
@@ -82,13 +93,4 @@ export const FlatListStyle={
         backgroundColor: "#000",
         alignSelf: "center"
     }
-}
-
-export const ButtonTextStyle={
-    color: '#6db105',
-    fontSize: 20
-}
-
-export const ErrorStyle={
-    color: '#f5624b'
 }

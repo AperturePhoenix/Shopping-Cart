@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, KeyboardAvoidingView, Alert, Image, Text } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
-import { MainContainerStyle, ChildContainerStyle, TextHeaderStyle, ButtonTextStyle, ErrorStyle } from '../store/Styler'
+import { MainContainerStyle, LoginStyle } from '../store/Styler'
 
 export default class Login extends Component {
     static navigationOptions = {
@@ -13,57 +13,74 @@ export default class Login extends Component {
         super(props)
 
         this.state = {
-            username: '', usernameError: '',
+            email: '', emailError: '',
             password: '', passwordError: ''
         }
     }
 
+    componentDidMount() {
+        this.authUnsubcriber = FirebaseAPI.isLoggedIn( user => {
+            if (user) {
+                this.props.navigation.navigate('App')
+            }
+        })
+    }
+
+    componentWillUnmount() {
+        this.authUnsubcriber()
+    }
+
     validateInformation = () => {
         isValid = true
-        if (!this.state.username) {
+
+        if (!this.state.email) {
             this.setState({
-                usernameError: 'Please enter a username'
+                emailError: 'Please enter an email'
             })
-            isValid = false
-        } else { this.setState({
-            usernameError: ''
-        })}
+        } else {
+            const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+            if (reg.test(this.state.email) === true){
+                this.setState({
+                    emailError: ''
+                })
+            } else {
+                this.setState({
+                    emailError: 'Please enter a valid email'
+                })
+                isValid = false
+            }
+        }
+
         if (!this.state.password) {
             this.setState({
                 passwordError: 'Please enter a password'
             })
             isValid = false
-        } else { this.setState({
-            passwordError: ''
-        })}
+        } else { 
+            this.setState({
+                passwordError: ''
+            })
+        }
 
         return isValid
     }
 
     logIn = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.login(this.state.username, this.state.password)
-                .then(success => {
-                    if (success) {
-                        this.props.navigation.navigate('App')
-                    } else {
-                        Alert.alert( message='Invalid username or password' )
-                    }
-                })
-                .catch(error => { console.log(error) })
+            FirebaseAPI.login(this.state.email, this.state.password)
         }
     }
 
     render() {
         return(
             <View style={MainContainerStyle}>
-                <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
+                <KeyboardAvoidingView style={LoginStyle.ChildContainer} behavior='padding' enabled>
                     <Image source={require('../assets/Starfruit.png')} style={{width: 200, height: 200, marginBottom: 10 }} />
-                    <Text style={ TextHeaderStyle } >Shopping Cart</Text>
-                    <Input placeholder='Username' onChangeText={ username => this.setState({ username: username })} errorStyle={ErrorStyle} errorMessage={this.state.usernameError} />
-                    <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={ErrorStyle} errorMessage={this.state.passwordError} />
-                    <Button title='Sign In' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.logIn() } />
-                    <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.navigate('Register') } />
+                    <Text style={LoginStyle.Header} >Shopping Cart</Text>
+                    <Input placeholder='Email' onChangeText={ email => this.setState({ email: email })} errorStyle={LoginStyle.Error} errorMessage={this.state.emailError} />
+                    <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={LoginStyle.Error} errorMessage={this.state.passwordError} />
+                    <Button title='Sign In' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={ () => this.logIn() } />
+                    <Button title='Register' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={ () => this.props.navigation.navigate('Register') } />
                 </KeyboardAvoidingView>
             </View>
         )

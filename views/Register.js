@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, KeyboardAvoidingView, Alert } from 'react-native'
 import { Button, Input } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
-import { MainContainerStyle, ChildContainerStyle, ButtonTextStyle, ErrorStyle } from '../store/Styler'
+import { MainContainerStyle, LoginStyle } from '../store/Styler'
 
 export default class Register extends Component {
     static navigationOptions = {
@@ -13,54 +13,97 @@ export default class Register extends Component {
         super(props)
 
         this.state = {
-            username: '', usernameError: '',
             name: '', nameError: '',
-            password: '', passwordError: ''
+            email: '', emailError: '',
+            password: '', passwordError: '',
+            passwordConfirm: ''
         }
+    }
 
+    componentDidMount() {
+        this.authUnsubcriber = FirebaseAPI.isLoggedIn( user => {
+            if (user) {
+                this.props.navigation.navigate('App')
+            }
+        })
+    }
 
+    componentWillUnmount() {
+        this.authUnsubcriber()
     }
 
     registerAccount = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.register(this.state.name, this.state.username, this.state.password)
-                .then(success => {
-                    if (success) {
-                        this.props.navigation.navigate('App')
-                    } else {
-                        Alert.alert(title='Error', message='username is already taken')
+            FirebaseAPI.register(this.state.name, this.state.email, this.state.password)
+                .catch(error => {
+                    console.log('Register.js: ' + error.code + ' -- ' + error.message)
+                    
+                    switch(error.code) {
+                        case 'auth/email-already-in-use':
+                            Alert.alert(message='Email is already taken')
+                            break
+                        case 'auth/invalid-email':
+                                Alert.alert(message='Invalid email')
+                            break
+                        case 'auth/operation-not-allowed':
+                                Alert.alert(message='Email authorization not enabled. Please email support to enable feature')
+                            break
+                        case 'auth/weak-password':
+                                Alert.alert(title='Weak Password', message='Please enter a stronger password')
+                            break
                     }
                 })
-                .catch(error => { console.log(error) })
         }
     }
 
     validateInformation = () => {
         isValid = true
-        if (!this.state.username) {
-            this.setState({
-                usernameError: 'Please enter a username'
-            })
-            isValid = false
-        } else { this.setState({
-            usernameError: ''
-        })}
+
         if (!this.state.name) {
             this.setState({
                 nameError: 'Please enter a name'
             })
             isValid = false
-        } else { this.setState({
-            nameError: ''
-        })}
+        } else { 
+            this.setState({
+                nameError: ''
+            })
+        }
+
+        if (!this.state.email) {
+            this.setState({
+                emailError: 'Please enter an email'
+            })
+        } else {
+            const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+            if (reg.test(this.state.email) === true){
+                this.setState({
+                    emailError: ''
+                })
+            } else {
+                this.setState({
+                    emailError: 'Please enter a valid email'
+                })
+                isValid = false
+            }
+        }
+
         if (!this.state.password) {
             this.setState({
                 passwordError: 'Please enter a password'
             })
             isValid = false
-        } else { this.setState({
-            passwordError: ''
-        })}
+        } else { 
+            if (this.state.password === this.state.passwordConfirm) {
+                this.setState({
+                    passwordError: ''
+                })
+            } else {
+                this.setState({
+                    passwordError: 'Passwords do not match'
+                })
+            }
+        }
 
         return isValid
     }
@@ -68,12 +111,13 @@ export default class Register extends Component {
     render() {
         return(
             <View style={MainContainerStyle}>
-            <KeyboardAvoidingView style={ChildContainerStyle} behavior='padding' enabled>
-                <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={ErrorStyle} errorMessage={this.state.nameError} />
-                <Input placeholder='Username' onChangeText={ username => {this.setState({ username: username })}} errorStyle={ErrorStyle} errorMessage={this.state.usernameError} />
-                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={ErrorStyle} errorMessage={this.state.passwordError}/>
-                <Button title='Register' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.registerAccount() } />
-                <Button title='Back' type='clear' titleStyle={ButtonTextStyle} onPress={ () => this.props.navigation.goBack() } />
+            <KeyboardAvoidingView style={ChildContainer} behavior='padding' enabled>
+                <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={LoginStyle.Error} errorMessage={this.state.nameError} />
+                <Input placeholder='Email' onChangeText={ email => {this.setState({ email: email })}} errorStyle={LoginStyle.Error} errorMessage={this.state.emailError} />
+                <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={LoginStyle.Error} errorMessage={this.state.passwordError}/>
+                <Input placeholder='Confirm Password' onChangeText={ password => this.setState({ passwordConfirm: password })} secureTextEntry={true} />
+                <Button title='Register' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={ () => this.registerAccount() } />
+                <Button title='Back' titleStyle={ButtonTextStyle} type={LoginStyle.Button.Type} onPress={ () => this.props.navigation.goBack() } />
             </KeyboardAvoidingView>
             </View>
         )

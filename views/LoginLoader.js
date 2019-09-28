@@ -9,15 +9,13 @@ export default class LoginLoader extends Component {
     }
 
     componentDidMount() {
-        this.bootstrap()
+        this.authUnsubscriber = FirebaseAPI.isLoggedIn( user => {
+            this.props.navigation.navigate(user ? 'App' : 'Auth')
+        })
     }
 
-    bootstrap = () => {
-        FirebaseAPI.loadAsyncStorage()
-            .then(success => {
-                this.props.navigation.navigate(success ? 'App' : 'Auth')
-            })
-            .catch(error => { console.log(error) })
+    componentWillUnmount() {
+        this.authUnsubscriber()
     }
 
     render() {
