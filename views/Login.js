@@ -5,9 +5,6 @@ import FirebaseAPI from '../store/FirebaseAPI'
 import { MainContainerStyle, LoginStyle } from '../store/Styler'
 
 export default class Login extends Component {
-    static navigationOptions = {
-        header: null
-    }
 
     constructor(props) {
         super(props)
@@ -68,6 +65,20 @@ export default class Login extends Component {
     logIn = () => {
         if (this.validateInformation()) {
             FirebaseAPI.login(this.state.email, this.state.password)
+                .catch(error => {
+                    console.log('Login.js: ' + error.code + ' -- ' + error.message)
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            Alert.alert(message='Incorrect email and/or password')
+                            break
+                        case 'auth/user-disabled':
+                            Alert.alert(message='User account is disabled')
+                            break
+                        
+                    }
+                })
         }
     }
 

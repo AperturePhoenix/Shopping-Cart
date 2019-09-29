@@ -5,9 +5,6 @@ import FirebaseAPI from '../store/FirebaseAPI'
 import { MainContainerStyle, LoginStyle } from '../store/Styler'
 
 export default class Register extends Component {
-    static navigationOptions = {
-        header: null
-    }
 
     constructor(props) {
         super(props)
@@ -111,13 +108,13 @@ export default class Register extends Component {
     render() {
         return(
             <View style={MainContainerStyle}>
-            <KeyboardAvoidingView style={ChildContainer} behavior='padding' enabled>
+            <KeyboardAvoidingView style={LoginStyle.ChildContainer} behavior='padding' enabled>
                 <Input placeholder='First Name' onChangeText={ name => this.setState({ name: name })} errorStyle={LoginStyle.Error} errorMessage={this.state.nameError} />
                 <Input placeholder='Email' onChangeText={ email => {this.setState({ email: email })}} errorStyle={LoginStyle.Error} errorMessage={this.state.emailError} />
                 <Input placeholder='Password' onChangeText={ password => this.setState({ password: password })} secureTextEntry={true} errorStyle={LoginStyle.Error} errorMessage={this.state.passwordError}/>
                 <Input placeholder='Confirm Password' onChangeText={ password => this.setState({ passwordConfirm: password })} secureTextEntry={true} />
                 <Button title='Register' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={ () => this.registerAccount() } />
-                <Button title='Back' titleStyle={ButtonTextStyle} type={LoginStyle.Button.Type} onPress={ () => this.props.navigation.goBack() } />
+                <Button title='Back' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={ () => this.props.navigation.goBack() } />
             </KeyboardAvoidingView>
             </View>
         )

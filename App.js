@@ -12,6 +12,9 @@ const authStack = createStackNavigator({
   Register: Register 
 }, {
   initialRouteName: 'Login',
+  defaultNavigationOptions: {
+    header: null
+  }
 })
 const appDrawer = createDrawerNavigator({ 
   Home: MyShoppingList,

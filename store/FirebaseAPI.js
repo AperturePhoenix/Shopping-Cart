@@ -23,11 +23,19 @@ export default class FirebaseAPI {
     }
 
     static login = (email, password) => {
-        this.auth.signInWithEmailAndPassword(email, password)
+        return this.auth.signInWithEmailAndPassword(email, password)
     }
 
     static register = (name, email, password) => {
-        return this.auth.createUserWithEmailAndPassword(email, password)
+        return new Promise((reject) => {
+            this.auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    this.db.doc(userCredential.user.uid).set({
+                        name: name
+                    })
+                })
+                .catch(error => reject(error))
+        })
     }
 
     static getField = (username, field) => {
