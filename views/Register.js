@@ -17,21 +17,12 @@ export default class Register extends Component {
         }
     }
 
-    componentDidMount() {
-        this.authUnsubcriber = FirebaseAPI.isLoggedIn( user => {
-            if (user) {
-                this.props.navigation.navigate('App')
-            }
-        })
-    }
-
-    componentWillUnmount() {
-        this.authUnsubcriber()
-    }
-
     registerAccount = () => {
         if (this.validateInformation()) {
             FirebaseAPI.register(this.state.name, this.state.email, this.state.password)
+                .then(success => {
+                    this.props.navigation.navigate('App')
+                })
                 .catch(error => {
                     console.log('Register.js: ' + error.code + ' -- ' + error.message)
                     

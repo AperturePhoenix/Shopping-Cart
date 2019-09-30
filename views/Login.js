@@ -15,18 +15,6 @@ export default class Login extends Component {
         }
     }
 
-    componentDidMount() {
-        this.authUnsubcriber = FirebaseAPI.isLoggedIn( user => {
-            if (user) {
-                this.props.navigation.navigate('App')
-            }
-        })
-    }
-
-    componentWillUnmount() {
-        this.authUnsubcriber()
-    }
-
     validateInformation = () => {
         isValid = true
 
@@ -65,6 +53,9 @@ export default class Login extends Component {
     logIn = () => {
         if (this.validateInformation()) {
             FirebaseAPI.login(this.state.email, this.state.password)
+                .then(success => {
+                    this.props.navigation.navigate('App')
+                })
                 .catch(error => {
                     console.log('Login.js: ' + error.code + ' -- ' + error.message)
                     switch (error.code) {

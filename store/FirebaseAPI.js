@@ -19,20 +19,33 @@ export default class FirebaseAPI {
     }
 
     static isLoggedIn = (callback) => {
-        return this.auth.onAuthStateChanged(callback)
+        return this.auth.onAuthStateChanged(user => {
+            this.userInfo = user
+            callback(user)
+        })
     }
 
     static login = (email, password) => {
-        return this.auth.signInWithEmailAndPassword(email, password)
+        return new Promise((resolve, reject) => {
+            this.auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    this.userInfo = userCredential.user
+                    resolve(true)
+                })
+                .catch(error => reject(error))
+        })
     }
 
     static register = (name, email, password) => {
-        return new Promise((reject) => {
+        return new Promise((resolve, reject) => {
             this.auth.createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
+                    this.userInfo = userCredential.user
                     this.db.doc(userCredential.user.uid).set({
-                        name: name
+                        name: name,
+                        email: email
                     })
+                    resolve(true)
                 })
                 .catch(error => reject(error))
         })
