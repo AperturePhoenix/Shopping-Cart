@@ -21,6 +21,7 @@ export default class FirebaseAPI {
     static isLoggedIn = (callback) => {
         return this.auth.onAuthStateChanged(user => {
             this.userInfo = user
+            this.userName = this.getName(user.uid)
             callback(user)
         })
     }
@@ -30,6 +31,7 @@ export default class FirebaseAPI {
             this.auth.signInWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     this.userInfo = userCredential.user
+                    this.userName = this.getName(userCredential.user.uid)
                     resolve(true)
                 })
                 .catch(error => reject(error))
@@ -41,6 +43,7 @@ export default class FirebaseAPI {
             this.auth.createUserWithEmailAndPassword(email, password)
                 .then(userCredential => {
                     this.userInfo = userCredential.user
+                    this.userName = name
                     this.db.doc(userCredential.user.uid).set({
                         name: name,
                         email: email
@@ -51,24 +54,19 @@ export default class FirebaseAPI {
         })
     }
 
-    static getField = (username, field) => {
+    static getName = (uid) => {
         return new Promise((resolve, reject) => {
-            this.db.doc(username).get()
+            this.db.doc(uid).get()
                 .then(userSnapshot => {
-                    resolve(userSnapshot.get(field))
+                    resolve(userSnapshot.get('name'))
                 })
                 .catch(error => { reject(error) })
         })
     }
 
-    static setFields = (username, fields) => {
-        this.db.doc(username).set(fields)
-            .catch(error => { console.log(error) })
-    }
-
-    static itemExists = (username, item) => {
+    static itemExists = (uid, item) => {
         return new Promise((resolve, reject) => {
-            this.db.doc(username).collection('items').doc(item).get()
+            this.db.doc(uid).collection('items').doc(item).get()
             .then(item => {
                 resolve(item.exists)
             })
@@ -76,39 +74,32 @@ export default class FirebaseAPI {
         })
     }
 
-    static getItems = (username) => {
+    static getItems = (uid, index=0) => {
         return new Promise((resolve, reject) => {
-            this.db.doc(username).collection('items').get()
-                .then(querySnapshot => {
-                    items = []
-                    querySnapshot.forEach(queryDocSnapshot => {
-                        items.push({username: username, name: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
+            this.getName(uid)
+                .then(name => {
+                    this.db.doc(uid).collection('items').get()
+                    .then(querySnapshot => {
+                        items = []
+                        querySnapshot.forEach(queryDocSnapshot => {
+                            items.push({key: index++, uid: uid, userName: name, itemName: queryDocSnapshot.id, quantity: queryDocSnapshot.get('quantity')})
+                        })
+                        resolve(items)
                     })
-                    resolve(items)
                 })
                 .catch(error => { reject(error) })
         })
     }
 
-    static addItem = (username, item, quantity) => {
-        this.db.doc(username).collection('items').doc(item).set({
+    static addItem = (uid, item, quantity) => {
+        this.db.doc(uid).collection('items').doc(item).set({
             quantity: quantity
         }).catch(error => { console.log(error) })
     }
 
-    static removeItem = (username, item) => {
-        this.db.doc(username).collection('items').doc(item).delete()
+    static removeItem = (uid, item) => {
+        this.db.doc(uid).collection('items').doc(item).delete()
         .catch(error => { console.log(error) })
-    }
-
-    static getItemField = (username, item, field) => {
-        return new Promise((resolve, reject) => {
-            this.db.doc(username).collection('items').doc(item)
-            .then(itemSnapshot => {
-                resolve(itemSnapshot.get(field))
-            })
-            .catch(error => { reject(error) })
-        })
     }
 
     static groupExists = (username, group) => {

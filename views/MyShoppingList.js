@@ -12,7 +12,7 @@ export default class MyShoppingList extends Component {
     constructor(props) {
         super(props)
 
-        this.username = FirebaseAPI.username
+        this.uid = FirebaseAPI.userInfo.uid
         this.state = {
             items: [],
             item: '', itemError: '',
@@ -20,8 +20,11 @@ export default class MyShoppingList extends Component {
             itemViewIsOpen: false, itemViewOffsetY: new Animated.Value(-500), listViewOffsetY: new Animated.Value(-500),
             itemViewIcon: HeaderStyle.Add.Icon
         }
-        FirebaseAPI.getItems(this.username)
-            .then(items => { this.setState({ items: items }) })
+        FirebaseAPI.getItems(this.uid)
+            .then(items => { 
+                this.setState({ items: items })
+                this.itemsIndex = items.length
+            })
             .catch(error => { console.log(error) })
     }
 
@@ -48,13 +51,13 @@ export default class MyShoppingList extends Component {
 
     addItem = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.itemExists(this.username, this.state.item)
+            FirebaseAPI.itemExists(this.uid, this.state.item)
                 .then(exists => {
                     if (!exists) {
                         itemJoiner = [...this.state.items]
-                        itemJoiner.push({ name: this.state.item, quantity: this.state.quantity })
+                        itemJoiner.push({ key: this.itemsIndex++, name: this.state.item, quantity: this.state.quantity })
                         this.setState({ items: [...itemJoiner] })
-                        FirebaseAPI.addItem(this.username, this.state.item, this.state.quantity)
+                        FirebaseAPI.addItem(this.uid, this.state.item, this.state.quantity)
                     }
                     else {
                         Alert.alert(message='Item is already in the cart')
@@ -66,10 +69,12 @@ export default class MyShoppingList extends Component {
 
     removeItem = (item) => {
         let itemRemover = [...this.state.items]
-        let prevIndex = this.state.items.findIndex(itemName => itemName === item);
+        let prevIndex = this.state.items.findIndex(itemElement => itemElement.name === item);
+        console.log(itemRemover)
+        console.log(prevIndex)
         itemRemover.splice(prevIndex, 1)
         this.setState({ items: itemRemover })
-        FirebaseAPI.removeItem(this.username, item)
+        FirebaseAPI.removeItem(this.uid, item)
     }
 
     setItemViewLayout = (event) => {
@@ -154,11 +159,11 @@ export default class MyShoppingList extends Component {
                         )}
                         renderItem={ ({ item }) => (
                             <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.removeItem.bind(this, item.name ) }>
-                                <Text style={FlatListStyle.Text}>{item.name}</Text> 
+                                <Text style={FlatListStyle.Text}>{item.itemName}</Text> 
                                 <Text style={FlatListStyle.Subtle}>{item.quantity}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.toString() }
+                        keyExtractor={ (index) => index.key.toString() }
                     />
                 </Animated.View>
             </View>
