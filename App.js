@@ -6,6 +6,7 @@ import Login from './views/Login'
 import Register from './views/Register'
 import MyShoppingList from './views/MyShoppingList'
 import GroupView from './views/GroupView'
+import Profile from './views/Profile';
 
 const authStack = createStackNavigator({ 
   Login: Login, 
@@ -18,12 +19,12 @@ const authStack = createStackNavigator({
 })
 const appDrawer = createDrawerNavigator({ 
   Home: MyShoppingList,
-  Groups: GroupView
+  Groups: GroupView,
+  Profile: Profile
  }, {
   drawerType: 'slide',
   hideStatusBar: true,
   initialRouteName: 'Home'
-
 })
 
 export default createAppContainer(

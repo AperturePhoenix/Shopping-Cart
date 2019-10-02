@@ -54,6 +54,13 @@ export default class FirebaseAPI {
         })
     }
 
+    static signOut = () => {
+        return new Promise((resolve, reject) => {
+            this.auth.signOut()
+                .catch(error => reject(error))
+        })
+    }
+
     static getName = (uid=this.auth.currentUser.uid) => {
         return new Promise((resolve, reject) => {
             this.userCollection.doc(uid).get()
