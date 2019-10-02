@@ -14,14 +14,12 @@ export class GroupView extends Component {
     constructor(props) {
         super(props)
 
-        this.username = FirebaseAPI.username
-        FirebaseAPI.getGroupList(this.username)
+        FirebaseAPI.getGroupList()
             .then(groups => { this.setState({groups: groups})})
             .catch(error => { console.log(error) })
         this.state = {
             groups: [],
             groupName: '', groupNameError: '',
-            username: '', usernameError: '',
             groupViewIsOpen: false, groupViewOffsetY: new Animated.Value(-500), listViewOffsetY: new Animated.Value(-500),
             groupViewIcon: HeaderStyle.Add.Icon
         }
@@ -35,35 +33,21 @@ export class GroupView extends Component {
         } else {
             this.setState({ groupNameError: '' })
         }
-        if (!this.state.username) {
-            this.setState({ usernameError: 'Please enter a username' })
-            isValid = false
-        } else {
-            this.setState({ usernameError: '' })
-        }
+
         return isValid
     }
 
     createGroup = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.groupExists(this.username, this.state.groupName)
+            FirebaseAPI.groupExists(this.state.groupName)
             .then(groupExists => {
                 if (!groupExists) {
-                    FirebaseAPI.usernameExists(this.state.username)
-                        .then(usernameExists => {
-                            if (usernameExists) {
-                                FirebaseAPI.addUserToGroup(this.username, this.state.groupName, this.state.username)
-                                    .then(usernames => {
-                                        groupJoiner = this.state.groups
-                                        groupJoiner.push({name: this.state.groupName, usernames: usernames})
-                                        this.setState({
-                                            groups: [...groupJoiner]
-                                        })
-                                    })
-                            } else {
-                                Alert.alert( message='Username does not exist' )
-                            }
-                        })
+                    FirebaseAPI.createGroup(this.state.groupName)
+                    groupJoiner = [...this.state.groups];
+                    groupJoiner.push({name: this.state.groupName, usernames: [FirebaseAPI.auth.currentUser.uid]})
+                    this.setState({
+                        groups: groupJoiner
+                    })
                 } else {
                     Alert.alert( message='Group already exists' )
                 }
@@ -150,8 +134,7 @@ export class GroupView extends Component {
                 <Animated.View style={{ backgroundColor: DropDownStyle.BackgroundColor, transform: [{translateY: this.state.groupViewOffsetY}] }} >
                     <View pointerEvents={!this.state.groupViewIsOpen ? 'none' : 'auto'} onLayout={ event => this.setGroupViewLayout(event) }>
                         <Input placeholder='Group name' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={groupName => this.setState({ groupName: groupName })} errorStyle={DropDownStyle.Error} errorMessage={this.state.groupNameError} />
-                        <Input placeholder='Username' inputStyle={DropDownStyle.InputText} inputContainerStyle={DropDownStyle.InputContainer} placeholderTextColor={DropDownStyle.PlaceHolderColor} onChangeText={username => this.setState({ username: username })} errorStyle={DropDownStyle.Error} errorMessage={this.state.usernameError} />
-                        <Button title='Add User' titleStyle={DropDownStyle.Button.Title} type={DropDownStyle.Button.Type} onPress={() => this.createGroup()} />
+                        <Button title='Create Group' titleStyle={DropDownStyle.Button.Title} type={DropDownStyle.Button.Type} onPress={() => this.createGroup()} />
                     </View>
                 </Animated.View>
 
