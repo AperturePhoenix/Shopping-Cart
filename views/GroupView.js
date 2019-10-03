@@ -15,7 +15,10 @@ export class GroupView extends Component {
         super(props)
 
         FirebaseAPI.getGroupList()
-            .then(groups => { this.setState({groups: groups})})
+            .then(groups => {
+                groups.sort((a, b) => a.groupName < b.groupName ? -1 : 1)
+                this.setState({groups: groups})
+            })
             .catch(error => { console.log(error) })
         this.state = {
             groups: [],
@@ -43,11 +46,12 @@ export class GroupView extends Component {
             .then(groupExists => {
                 if (!groupExists) {
                     FirebaseAPI.createGroup(this.state.groupName)
-                    groupJoiner = [...this.state.groups];
-                    groupJoiner.push({name: this.state.groupName, usernames: [FirebaseAPI.auth.currentUser.uid]})
-                    this.setState({
-                        groups: groupJoiner
-                    })
+                        .then(group => {
+                            groupJoiner = [...this.state.groups]
+                            groupJoiner.push(group)
+                            groupJoiner.sort((a, b) => a.groupName < b.groupName ? -1 : 1)
+                            this.setState({ groups: groupJoiner })
+                        })
                 } else {
                     Alert.alert( message='Group already exists' )
                 }
@@ -70,9 +74,12 @@ export class GroupView extends Component {
         }
     }
 
-    loadGroup = (groupName) => {
-        //Pass params
-        this.props.navigation.navigate('GroupList', {groupName: groupName})
+    loadGroup = (group) => {
+        this.props.navigation.navigate('GroupList', {
+            gid: group.gid,
+            groupName: group.groupName,
+            uids: group.uids
+        })
     }
 
     removeGroup = (group) => {
@@ -81,6 +88,7 @@ export class GroupView extends Component {
 
     toggleAddGroup = () => {
         if (this.state.groupViewIsOpen) {
+            Keyboard.dismiss()
             Animated.parallel([
                 Animated.timing(
                     this.state.groupViewOffsetY,
@@ -145,11 +153,11 @@ export class GroupView extends Component {
                                 <View style={FlatListStyle.Separator} />
                             )}
                         renderItem={ ({ item }) => (
-                            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.loadGroup.bind(this, item.name ) } >
-                                <Text style={FlatListStyle.Text}>{item.name}</Text>
+                            <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.loadGroup.bind(this, item) } >
+                                <Text style={FlatListStyle.Text}>{item.groupName}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.toString() }
+                        keyExtractor={ (index) => index.gid.toString() }
                     />
                 </Animated.View>
             </View>

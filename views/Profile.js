@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { View, Text, Alert } from 'react-native'
 import { Header, Button } from 'react-native-elements'
 import { MainContainerStyle, HeaderStyle, LoginStyle } from '../store/Styler'
 import FirebaseAPI from '../store/FirebaseAPI'

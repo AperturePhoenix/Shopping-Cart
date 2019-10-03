@@ -8,27 +8,17 @@ export default class GroupList extends Component {
     constructor(props) {
         super(props)
 
-        this.username = FirebaseAPI.username
+        this.gid = this.props.navigation.getParam('gid', '')
         this.groupName = this.props.navigation.getParam('groupName', 'Group Usernames')
-        FirebaseAPI.getGroupUsernames(this.username, this.groupName)
-            .then(usernames => {
-                usernames.push(this.username)
-                this.setState({ usernames: usernames })
-                this.getItems()
+        this.uids = this.props.navigation.getParam('uids', '')
+        this.state = {
+            groupItems: []
+        }
+        FirebaseAPI.getGroupItems(this.uids)
+            .then(groupItems => {
+                this.setState({ groupItems: groupItems })
             })
             .catch(error => console.log(error))
-        this.state = {
-            usernames: [],
-            items: []
-        }
-    }
-
-    getItems = async() => {
-        let itemJoiner = []
-        for (let username of this.state.usernames) {
-            itemJoiner.push(...await FirebaseAPI.getItems(username))
-        }
-        this.setState({ items: [...itemJoiner] })
     }
 
     render() {
@@ -44,17 +34,17 @@ export default class GroupList extends Component {
                 </View>
 
                 <FlatList 
-                    data={ this.state.items }
+                    data={ this.state.groupItems }
                         ItemSeparatorComponent={ () => (
                                 <View style={FlatListStyle.Separator} />
                             )}
                         renderItem={ ({ item }) => (
                             <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} >
-                                <Text style={FlatListStyle.Text}>{item.name}</Text>
-                                <Text style={FlatListStyle.Subtle}>{item.username}</Text>
+                                <Text style={FlatListStyle.Text}>{item.itemName}</Text>
+                                <Text style={FlatListStyle.Subtle}>{item.name}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.toString() }
+                        keyExtractor={ (index) => index.iid.toString() }
                 />
             </View>
         )

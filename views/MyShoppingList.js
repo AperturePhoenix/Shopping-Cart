@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, FlatList, Alert, Animated, TouchableOpacity } from 'react-native'
+import { View, Text, FlatList, Alert, Animated, TouchableOpacity, Keyboard } from 'react-native'
 import { Button, Input, Header } from 'react-native-elements'
 import FirebaseAPI from '../store/FirebaseAPI'
 import { MainContainerStyle, DropDownStyle, FlatListStyle, HeaderStyle } from '../store/Styler'
@@ -23,7 +23,6 @@ export default class MyShoppingList extends Component {
             .then(items => {
                 items.sort((a, b) => a.itemName < b.itemName ? -1 : 1)
                 this.setState({ items: items })
-                this.itemsIndex = items.length
             })
             .catch(error => { console.log(error) })
     }
@@ -56,7 +55,6 @@ export default class MyShoppingList extends Component {
                     if (!exists) {
                         FirebaseAPI.addItem(this.state.item, this.state.quantity)
                             .then(item => {
-                                item.key = this.itemsIndex++
                                 itemJoiner = [...this.state.items]
                                 itemJoiner.push(item)
                                 itemJoiner.sort((a, b) => a.itemName < b.itemName ? -1 : 1)
@@ -95,6 +93,7 @@ export default class MyShoppingList extends Component {
 
     toggleAddItem() {
         if (this.state.itemViewIsOpen) {
+            Keyboard.dismiss()
             Animated.parallel([
                 Animated.timing(
                     this.state.itemViewOffsetY,
@@ -165,7 +164,7 @@ export default class MyShoppingList extends Component {
                                 <Text style={FlatListStyle.Subtle}>{item.itemQuantity}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.key.toString() }
+                        keyExtractor={ (index) => index.iid.toString() }
                     />
                 </Animated.View>
             </View>
