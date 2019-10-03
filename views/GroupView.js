@@ -4,7 +4,8 @@ import { Header, Button, Input } from 'react-native-elements'
 import { createStackNavigator} from 'react-navigation-stack'
 import FirebaseAPI from '../store/FirebaseAPI'
 import { MainContainerStyle, DropDownStyle, FlatListStyle, HeaderStyle } from '../store/Styler'
-import GroupList from './GroupList'
+import GroupItems from './GroupItems'
+import GroupUsers from './GroupUsers'
 
 export class GroupView extends Component {
     static navigationOptions = {
@@ -75,7 +76,7 @@ export class GroupView extends Component {
     }
 
     loadGroup = (group) => {
-        this.props.navigation.navigate('GroupList', {
+        this.props.navigation.navigate('GroupItems', {
             gid: group.gid,
             groupName: group.groupName,
             uids: group.uids
@@ -157,7 +158,7 @@ export class GroupView extends Component {
                                 <Text style={FlatListStyle.Text}>{item.groupName}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.gid.toString() }
+                        keyExtractor={ (index) => index.gid }
                     />
                 </Animated.View>
             </View>
@@ -167,7 +168,8 @@ export class GroupView extends Component {
 
 export default createStackNavigator({ 
     Groups: GroupView, 
-    GroupList: GroupList 
+    GroupItems: GroupItems,
+    GroupUsers: GroupUsers
     }, {
     initialRouteName: 'Groups',
     defaultNavigationOptions: {

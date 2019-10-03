@@ -4,7 +4,7 @@ import { Header, Button } from 'react-native-elements'
 import { MainContainerStyle, HeaderStyle, FlatListStyle } from '../store/Styler'
 import FirebaseAPI from '../store/FirebaseAPI'
 
-export default class GroupList extends Component {
+export default class GroupItems extends Component {
     constructor(props) {
         super(props)
 
@@ -21,6 +21,13 @@ export default class GroupList extends Component {
             .catch(error => console.log(error))
     }
 
+    navigateUserView = () => {
+        this.props.navigation.navigate('GroupUsers', {
+            gid: this.gid,
+            uids: this.uids
+        })
+    }
+
     render() {
         return (
             <View style={MainContainerStyle}>
@@ -29,6 +36,7 @@ export default class GroupList extends Component {
                         placement='left'
                         leftComponent={<Button icon={HeaderStyle.Back.Icon} type={HeaderStyle.Back.Type} onPress={() => this.props.navigation.goBack() } />}
                         centerComponent={{ text: this.groupName, style: HeaderStyle.Text }}
+                        rightComponent={<Button icon={HeaderStyle.Settings.Icon} type='clear' onPress={() => this.navigateUserView() } />}
                         backgroundColor={HeaderStyle.BackgroundColor}
                     />
                 </View>
@@ -44,7 +52,7 @@ export default class GroupList extends Component {
                                 <Text style={FlatListStyle.Subtle}>{item.name}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.iid.toString() }
+                        keyExtractor={ (index) => index.iid }
                 />
             </View>
         )

@@ -164,7 +164,7 @@ export default class MyShoppingList extends Component {
                                 <Text style={FlatListStyle.Subtle}>{item.itemQuantity}</Text>
                             </TouchableOpacity>
                         )}
-                        keyExtractor={ (index) => index.iid.toString() }
+                        keyExtractor={ (index) => index.iid }
                     />
                 </Animated.View>
             </View>

@@ -53,6 +53,9 @@ export const HeaderStyle={
     },
     Remove: {
         Icon: <Icon name='remove' color='white' />
+    },
+    Settings: {
+        Icon: <Icon name='settings' color='white' />
     }
 }
 

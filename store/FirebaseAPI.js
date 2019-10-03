@@ -23,8 +23,8 @@ export default class FirebaseAPI {
     static isLoggedIn = (callback) => {
         return this.auth.onAuthStateChanged(user => {
             if (user) {
-                this.getName(user.uid)
-                .then(name => this.userName = name)
+                this.getUserInfo(user.uid)
+                .then(user => this.userName = user.name)
                 .catch(error => console.log(error))
             }
             callback(user)
@@ -35,10 +35,8 @@ export default class FirebaseAPI {
         return new Promise((resolve, reject) => {
             this.auth.signInWithEmailAndPassword(email, password)
                 .then(userCredential => {
-                    this.getName()
-                        .then(name => {
-                            this.userName = name
-                        })
+                    this.getUserInfo()
+                        .then(user => this.userName = user.name)
                     resolve()
                 })
                 .catch(error => reject(error))
@@ -67,13 +65,31 @@ export default class FirebaseAPI {
         })
     }
 
-    static getName = (uid=this.auth.currentUser.uid) => {
+    static getUserInfo = (uid=this.auth.currentUser.uid) => {
         return new Promise((resolve, reject) => {
             this.userCollection.doc(uid).get()
                 .then(userSnapshot => {
-                    resolve(userSnapshot.get('name'))
+                    userObject = userSnapshot.data()
+                    userObject.uid = uid
+                    resolve(userObject)
                 })
                 .catch(error => { reject(error) })
+        })
+    }
+
+    static getUserListInfo = (uids) => {
+        return new Promise((resolve, reject) => {
+            promises = uids.map((value) => {
+                return this.getUserInfo(value)
+            })
+    
+            Promise.all(promises)
+                .then(values => {
+                    users = []
+                    values.forEach((value) => users.push(value))
+                    resolve(users)
+                })
+                .catch(error => reject(error))
         })
     }
 
@@ -192,7 +208,6 @@ export default class FirebaseAPI {
             Promise.all(promises)
                 .then(values => {
                     values.forEach(userItems => groupItems = groupItems.concat(userItems))
-                    console.log(groupItems)
                     resolve(groupItems)
                 })
                 .catch(error => reject(error))
