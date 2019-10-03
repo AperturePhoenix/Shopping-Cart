@@ -214,28 +214,15 @@ export default class FirebaseAPI {
         })
     }
 
-    static getGroupUsernames = (username, group) => {
+    static addUserToGroup = (gid, uid) => {
         return new Promise((resolve, reject) => {
-            this.userCollection.doc(username).collection('groups').doc(group).get()
+            this.groupCollection.doc(gid).get()
                 .then(groupSnapshot => {
-                    resolve(groupSnapshot.get('usernames'))
-            })
-            .catch(error => { reject(error) })
-        })
-    }
-
-    static addUserToGroup = (username, group, newUser) => {
-        return new Promise((resolve, reject) => {
-            this.getGroupUsernames(username, group) 
-            .then(usernames => {
-                if (usernames === undefined) usernames = []
-                usernames.push(newUser)
-                this.userCollection.doc(username).collection('groups').doc(group).set({
-                    usernames: [...usernames]
+                    uids = groupSnapshot.get('uids')
+                    uids.push(uid)
+                    this.groupCollection.doc(gid).update({ uids: uids })
                 })
-                resolve(usernames)
-            })
-            .catch(error => { reject(error) })
+                .catch(error => reject(error))
         })
     }
 }

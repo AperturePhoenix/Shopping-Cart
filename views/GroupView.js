@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, View, FlatList, Text, Alert, TouchableOpacity } from 'react-native'
+import { Animated, View, Keyboard, FlatList, Text, Alert, TouchableOpacity } from 'react-native'
 import { Header, Button, Input } from 'react-native-elements'
 import { createStackNavigator} from 'react-navigation-stack'
 import FirebaseAPI from '../store/FirebaseAPI'
