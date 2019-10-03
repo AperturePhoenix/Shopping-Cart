@@ -14,18 +14,29 @@ export default class GroupItems extends Component {
         this.state = {
             groupItems: []
         }
-        FirebaseAPI.getGroupItems(this.uids)
-            .then(groupItems => {
-                this.setState({ groupItems: groupItems })
-            })
-            .catch(error => console.log(error))
+        
+        this.updateItems()
     }
 
     navigateUserView = () => {
         this.props.navigation.navigate('GroupUsers', {
             gid: this.gid,
-            uids: this.uids
+            uids: this.uids,
+            callback: this.updateUIDs.bind(this)
         })
+    }
+
+    updateUIDs = (uids) => {
+        this.uids = uids
+        this.updateItems()
+    }
+
+    updateItems = () => {
+        FirebaseAPI.getGroupItems(this.uids)
+            .then(groupItems => {
+                this.setState({ groupItems: groupItems })
+            })
+            .catch(error => console.log(error))
     }
 
     render() {

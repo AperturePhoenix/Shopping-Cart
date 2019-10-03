@@ -17,6 +17,10 @@ export default class GroupUsers extends Component {
             userViewIcon: HeaderStyle.Add.Icon
         }
 
+        this.updateUsers()
+    }
+
+    updateUsers = () => {
         FirebaseAPI.getUserListInfo(this.uids)
             .then(users => {
                 users.sort((a, b) => a.name < b.name ? -1 : 1)
@@ -25,6 +29,11 @@ export default class GroupUsers extends Component {
                 })
             })
             .catch(error => console.log(error))
+    }
+
+    goBack = () => {
+        this.props.navigation.state.params.callback(this.uids)
+        this.props.navigation.goBack()
     }
 
     validateInformation = () => {
@@ -53,7 +62,23 @@ export default class GroupUsers extends Component {
 
     addUser = () => {
         if (this.validateInformation()) {
-
+            FirebaseAPI.getUID(this.state.email)
+                .then(uid => {
+                    if (uid) {
+                        if (!this.uids.includes(uid)) {
+                            FirebaseAPI.addUserToGroup(this.gid, uid)
+                            this.uids.push(uid)
+                            this.updateUsers()
+                        }
+                        else {
+                            Alert.alert(message='User is already in the group')
+                        }
+                    }
+                    else {
+                        Alert.alert(message='Email invalid or user does not exist')
+                    }
+                })
+                .catch(error => console.log(error)) 
         }
     }
 
@@ -113,7 +138,7 @@ export default class GroupUsers extends Component {
                 <View style={HeaderStyle.ZPosition} >
                     <Header
                         placement='left'
-                        leftComponent={<Button icon={HeaderStyle.Back.Icon} type={HeaderStyle.Back.Type} onPress={() => this.props.navigation.goBack() } />}
+                        leftComponent={<Button icon={HeaderStyle.Back.Icon} type={HeaderStyle.Back.Type} onPress={() => this.goBack() } />}
                         centerComponent={{ text: 'Users', style: HeaderStyle.Text }}
                         rightComponent={<Button icon={this.state.userViewIcon} type='clear' onPress={() => this.toggleAddUser() } />}
                         backgroundColor={HeaderStyle.BackgroundColor}

@@ -34,9 +34,9 @@ export default class Profile extends Component {
                 />
 
                 <View style={LoginStyle.ChildContainer} >
-                    <Text>{this.state.name}</Text>
-                    <Text>{this.state.email}</Text>
-                    <Button title='Sign Out' onPress={() => this.signOut() } />
+                    <Text style={LoginStyle.Header}>{this.state.name}</Text>
+                    <Text style={LoginStyle.Header}>{this.state.email}</Text>
+                    <Button title='Sign Out' titleStyle={LoginStyle.Button.Title} type={LoginStyle.Button.Type} onPress={() => this.signOut() } />
                 </View>
             </View>
         )

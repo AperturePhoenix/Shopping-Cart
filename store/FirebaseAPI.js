@@ -77,6 +77,27 @@ export default class FirebaseAPI {
         })
     }
 
+    static userExists = (email) => {
+        return new Promise((resolve, reject) => {
+            this.userCollection.where('email', '==', email).get()
+                .then(querySnapshot => {
+                    resolve(!querySnapshot.empty)
+                })
+                .catch(error => reject(error))
+        })
+    }
+
+    static getUID = (email) => {
+        return new Promise((resolve, reject) => {
+            this.userCollection.where('email', '==', email).get()
+                .then(querySnapshot => {
+                    if (querySnapshot.empty) resolve()
+                    resolve(querySnapshot.docs[0].id)
+                })
+                .catch(error => reject(error))
+        })
+    }
+
     static getUserListInfo = (uids) => {
         return new Promise((resolve, reject) => {
             promises = uids.map((value) => {
@@ -221,6 +242,7 @@ export default class FirebaseAPI {
                     uids = groupSnapshot.get('uids')
                     uids.push(uid)
                     this.groupCollection.doc(gid).update({ uids: uids })
+                    resolve()
                 })
                 .catch(error => reject(error))
         })
