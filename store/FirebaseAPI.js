@@ -167,18 +167,15 @@ export default class FirebaseAPI {
 
     static groupExists = (groupName) => {
         return new Promise((resolve, reject) => {
-            promises = []
-            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', true).where('groupName', '==', groupName).get())
-            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', false).where('groupName', '==', groupName).get())
-            
-            Promise.all(promises)
-                .then((values) => {
+            this.getGroupList()
+                .then(groups => {
                     exists = false
-                    values.forEach(querySnapshot => {
-                        if (querySnapshot.empty) {
+                    for (var i in groups) {
+                        if (groups[i].name === groupName) {
                             exists = true
+                            break
                         }
-                    })
+                    }
                     resolve(exists)
                 })
                 .catch(error => reject(error))
