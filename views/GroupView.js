@@ -61,6 +61,20 @@ export class GroupView extends Component {
         }
     }
 
+    updateUsers = (gid, users) => {
+        groupUpdater = this.state.groups
+        for (var i in groupUpdater) {
+            if (groupUpdater[i].gid === gid) {
+                groupUpdater[i].users = users
+                break
+            }
+        }
+
+        this.setState({
+            groups: groupUpdater
+        })
+    }
+
     setGroupViewLayout = (event) => {
         let { height } = event.nativeEvent.layout
         this.setState({
@@ -79,7 +93,8 @@ export class GroupView extends Component {
         this.props.navigation.navigate('GroupItems', {
             gid: group.gid,
             groupName: group.name,
-            users: group.users
+            users: group.users,
+            callback: this.updateUsers.bind(this)
         })
     }
 

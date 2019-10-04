@@ -27,6 +27,7 @@ export default class GroupItems extends Component {
     }
 
     updateUsers = (users) => {
+        this.props.navigation.state.params.callback(this.gid, users)
         this.users = users
         this.updateItems()
     }
