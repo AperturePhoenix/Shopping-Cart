@@ -78,8 +78,8 @@ export class GroupView extends Component {
     loadGroup = (group) => {
         this.props.navigation.navigate('GroupItems', {
             gid: group.gid,
-            groupName: group.groupName,
-            uids: group.uids
+            groupName: group.name,
+            users: group.users
         })
     }
 
@@ -155,7 +155,7 @@ export class GroupView extends Component {
                             )}
                         renderItem={ ({ item }) => (
                             <TouchableOpacity style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }} onPress={ this.loadGroup.bind(this, item) } >
-                                <Text style={FlatListStyle.Text}>{item.groupName}</Text>
+                                <Text style={FlatListStyle.Text}>{item.name}</Text>
                             </TouchableOpacity>
                         )}
                         keyExtractor={ (index) => index.gid }

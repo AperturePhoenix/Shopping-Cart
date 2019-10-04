@@ -9,7 +9,7 @@ export default class GroupUsers extends Component {
         super(props)
 
         this.gid = this.props.navigation.getParam('gid', '')
-        this.uids = this.props.navigation.getParam('uids', '')
+        this.users = this.props.navigation.getParam('users', [])
         this.state = {
             users: [],
             email: '', emailError: '',
@@ -17,13 +17,11 @@ export default class GroupUsers extends Component {
             userViewIcon: HeaderStyle.Add.Icon
         }
 
-        this.updateUsers()
-    }
-
-    updateUsers = () => {
-        FirebaseAPI.getUserListInfo(this.uids)
+        uids = this.users.map((value) => { return value.uid })
+        FirebaseAPI.getUserListInfo(uids)
             .then(users => {
                 users.sort((a, b) => a.name < b.name ? -1 : 1)
+                this.users = users
                 this.setState({
                     users: users
                 })
@@ -32,7 +30,7 @@ export default class GroupUsers extends Component {
     }
 
     goBack = () => {
-        this.props.navigation.state.params.callback(this.uids)
+        this.props.navigation.state.params.callback(this.users)
         this.props.navigation.goBack()
     }
 
@@ -62,13 +60,17 @@ export default class GroupUsers extends Component {
 
     addUser = () => {
         if (this.validateInformation()) {
-            FirebaseAPI.getUID(this.state.email)
-                .then(uid => {
-                    if (uid) {
-                        if (!this.uids.includes(uid)) {
-                            FirebaseAPI.addUserToGroup(this.gid, uid)
-                            this.uids.push(uid)
-                            this.updateUsers()
+            FirebaseAPI.getUser(this.state.email.toLowerCase())
+                .then(user => {
+                    if (user) {
+                        uids = this.users.map((value) => {return value.uid})
+                        if (!uids.includes(user.uid)) {
+                            FirebaseAPI.addUserToGroup(this.gid, user.uid)
+                                .catch(error => console.log(error))
+                            
+                            this.users.push(user)
+                            this.users.sort((a, b) => a.name < b.name ? -1 : 1)
+                            this.setState({users: this.users})
                         }
                         else {
                             Alert.alert(message='User is already in the group')

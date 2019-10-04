@@ -77,22 +77,16 @@ export default class FirebaseAPI {
         })
     }
 
-    static userExists = (email) => {
-        return new Promise((resolve, reject) => {
-            this.userCollection.where('email', '==', email).get()
-                .then(querySnapshot => {
-                    resolve(!querySnapshot.empty)
-                })
-                .catch(error => reject(error))
-        })
-    }
-
-    static getUID = (email) => {
+    static getUser = (email) => {
         return new Promise((resolve, reject) => {
             this.userCollection.where('email', '==', email).get()
                 .then(querySnapshot => {
                     if (querySnapshot.empty) resolve()
-                    resolve(querySnapshot.docs[0].id)
+                    else {
+                        userObject = querySnapshot.docs[0].data()
+                        userObject.uid = querySnapshot.docs[0].id
+                        resolve(userObject)
+                    }
                 })
                 .catch(error => reject(error))
         })
@@ -173,26 +167,36 @@ export default class FirebaseAPI {
 
     static groupExists = (groupName) => {
         return new Promise((resolve, reject) => {
-            this.groupCollection.where('uids', 'array-contains', this.auth.currentUser.uid).where('groupName', '==', groupName).get()
-                .then(querySnapshot => {
-                    resolve(!querySnapshot.empty)
+            promises = []
+            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', true).where('groupName', '==', groupName).get())
+            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', false).where('groupName', '==', groupName).get())
+            
+            Promise.all(promises)
+                .then((values) => {
+                    exists = false
+                    values.forEach(querySnapshot => {
+                        if (querySnapshot.empty) {
+                            exists = true
+                        }
+                    })
+                    resolve(exists)
                 })
                 .catch(error => reject(error))
         })
     }
 
     static createGroup = (groupName) => {
-        users = []
-        users.push(this.auth.currentUser.uid)
         return new Promise((resolve, reject) => {
-            groupObject = {
-                groupName: groupName,
-                uids: users
-            }
-            this.groupCollection.add(groupObject)
+            group = {name: groupName}
+            group[this.auth.currentUser.uid] = true
+            this.groupCollection.add(group)
                 .then(groupReference => {
-                    groupObject.gid = groupReference.id
-                    resolve (groupObject)
+                    groupObject = {
+                        gid: groupReference.id,
+                        name: groupName,
+                        users: [{uid: this.auth.currentUser.uid, admin: true}]
+                    }
+                    resolve(groupObject)
                 })
                 .catch(error => reject(error))
         })
@@ -200,20 +204,26 @@ export default class FirebaseAPI {
 
     static getGroupList = () => {
         return new Promise((resolve, reject) => {
-            this.groupCollection.where('uids', 'array-contains', this.auth.currentUser.uid).get()
-                .then(querySnapshot => {
-                    groups = []
-                    if (!querySnapshot.empty) {
+            promises = []
+            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', true).get())
+            promises.push(this.groupCollection.where(this.auth.currentUser.uid, '==', false).get())
+
+            Promise.all(promises)
+                .then(values => {
+                    groupObject = []
+                    values.forEach(querySnapshot => {    
                         querySnapshot.forEach(groupSnapshot => {
-                            let {groupName, uids} = groupSnapshot.data()
-                            groups.push({
-                                gid: groupSnapshot.id,
-                                groupName: groupName,
-                                uids: uids
-                            })
+                            users = groupSnapshot.data()
+                            delete users.name
+    
+                            userObject = []
+                            for (var user in users) {
+                                userObject.push({uid: user, email: users[user]})
+                            }
+                            groupObject.push({gid: groupSnapshot.id, name: groupSnapshot.get('name'), users: userObject})
                         })
-                    }
-                    resolve(groups)
+                    })
+                    resolve(groupObject)
                 })
                 .catch(error => reject(error))
         })
@@ -235,15 +245,12 @@ export default class FirebaseAPI {
         })
     }
 
-    static addUserToGroup = (gid, uid) => {
+    static addUserToGroup = (gid, uid, isAdmin = false) => {
         return new Promise((resolve, reject) => {
-            this.groupCollection.doc(gid).get()
-                .then(groupSnapshot => {
-                    uids = groupSnapshot.get('uids')
-                    uids.push(uid)
-                    this.groupCollection.doc(gid).update({ uids: uids })
-                    resolve()
-                })
+            user = {}
+            user[uid] = isAdmin
+            this.groupCollection.doc(gid).update(user)
+                .then(() => resolve())
                 .catch(error => reject(error))
         })
     }

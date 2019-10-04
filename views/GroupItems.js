@@ -10,7 +10,7 @@ export default class GroupItems extends Component {
 
         this.gid = this.props.navigation.getParam('gid', '')
         this.groupName = this.props.navigation.getParam('groupName', 'Group Usernames')
-        this.uids = this.props.navigation.getParam('uids', '')
+        this.users = this.props.navigation.getParam('users', [])
         this.state = {
             groupItems: []
         }
@@ -21,19 +21,21 @@ export default class GroupItems extends Component {
     navigateUserView = () => {
         this.props.navigation.navigate('GroupUsers', {
             gid: this.gid,
-            uids: this.uids,
-            callback: this.updateUIDs.bind(this)
+            users: this.users,
+            callback: this.updateUsers.bind(this)
         })
     }
 
-    updateUIDs = (uids) => {
-        this.uids = uids
+    updateUsers = (users) => {
+        this.users = users
         this.updateItems()
     }
 
     updateItems = () => {
-        FirebaseAPI.getGroupItems(this.uids)
+        uids = this.users.map((value) => {return value.uid})
+        FirebaseAPI.getGroupItems(uids)
             .then(groupItems => {
+                groupItems.sort((a, b) => a.itemName < b.itemName ? -1 : 1)
                 this.setState({ groupItems: groupItems })
             })
             .catch(error => console.log(error))
