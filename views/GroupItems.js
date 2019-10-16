@@ -32,7 +32,7 @@ export default class GroupItems extends Component {
 
   updateUsers = users => {
     const { navigation } = this.props;
-    navigation.state.params.callback(this.gid, users);
+    navigation.state.params.callback();
     this.users = users;
     this.updateItems();
   };

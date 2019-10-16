@@ -6,7 +6,9 @@ import FirebaseAPI from '../store/FirebaseAPI';
 import { MainContainerStyle, LoginStyle } from '../store/Styler';
 
 export default class LoginLoader extends Component {
-  componentWillMount() {
+  constructor(props) {
+    super(props);
+
     FirebaseAPI.initializeApp();
   }
 

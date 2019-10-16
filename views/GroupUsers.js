@@ -22,8 +22,12 @@ export default class GroupUsers extends Component {
       userViewIcon: HeaderStyle.Add.Icon,
     };
 
-    const uids = this.users.map(value => {
-      return value.uid;
+    const uids = this.users.map(user => {
+      const { uid } = user;
+      if (uid === FirebaseAPI.auth.currentUser.uid) {
+        this.isAdmin = user.isAdmin;
+      }
+      return uid;
     });
     FirebaseAPI.getUserListInfo(uids)
       .then(users => {
@@ -46,10 +50,16 @@ export default class GroupUsers extends Component {
     let isValid = true;
     const { email } = this.state;
 
+    if (this.isAdmin !== true) {
+      isValid = false;
+      Alert.alert('', 'Do not have permissions to make changes');
+    }
+
     if (!email) {
       this.setState({
         emailError: 'Please enter an email',
       });
+      isValid = false;
     } else {
       const reg = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
       if (reg.test(email) === true) {

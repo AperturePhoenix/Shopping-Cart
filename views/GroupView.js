@@ -67,26 +67,15 @@ export class GroupView extends Component {
     }
   };
 
-  updateUsers = (gid, users) => {
-    const { groups } = this.state;
-    const groupUpdater = [...groups];
-
-    groupUpdater.forEach((group, index) => {
-      if (group.gid === gid) {
-        groupUpdater[index].users = users;
-      }
-    });
-
-    // for (const i in groupUpdater) {
-    //   if (groupUpdater[i].gid === gid) {
-    //     groupUpdater[i].users = users;
-    //     break;
-    //   }
-    // }
-
-    this.setState({
-      groups: groupUpdater,
-    });
+  updateView = () => {
+    FirebaseAPI.getGroupList()
+      .then(groups => {
+        groups.sort((a, b) => (a.groupName < b.groupName ? -1 : 1));
+        this.setState({ groups });
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
 
   setGroupViewLayout = event => {
@@ -110,7 +99,7 @@ export class GroupView extends Component {
       gid: group.gid,
       groupName: group.name,
       users: group.users,
-      callback: this.updateUsers.bind(this),
+      callback: this.updateView.bind(this),
     });
   };
 

@@ -210,7 +210,7 @@ export default class FirebaseAPI {
           const groupObject = {
             gid: groupReference.id,
             name: groupName,
-            users: [{ uid: this.auth.currentUser.uid, admin: true }],
+            users: [{ uid: this.auth.currentUser.uid, isAdmin: true }],
           };
           resolve(groupObject);
         })
