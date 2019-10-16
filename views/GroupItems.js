@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Header, Button } from 'react-native-elements';
 import PropTypes from 'prop-types';
 import { MainContainerStyle, HeaderStyle, FlatListStyle } from '../store/Styler';
@@ -16,6 +16,7 @@ export default class GroupItems extends Component {
     this.users = navigation.getParam('users', []);
     this.state = {
       groupItems: [],
+      isRefreshing: false,
     };
 
     this.updateItems();
@@ -37,6 +38,11 @@ export default class GroupItems extends Component {
     this.updateItems();
   };
 
+  refreshItems = () => {
+    this.setState({ isRefreshing: true });
+    this.updateItems();
+  };
+
   updateItems = () => {
     const uids = this.users.map(value => {
       return value.uid;
@@ -44,13 +50,13 @@ export default class GroupItems extends Component {
     FirebaseAPI.getGroupItems(uids)
       .then(groupItems => {
         groupItems.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
-        this.setState({ groupItems });
+        this.setState({ groupItems, isRefreshing: false });
       })
       .catch(error => console.log(error));
   };
 
   render() {
-    const { groupItems } = this.state;
+    const { groupItems, isRefreshing } = this.state;
     const { navigation } = this.props;
     return (
       <View style={MainContainerStyle}>
@@ -88,6 +94,9 @@ export default class GroupItems extends Component {
             </TouchableOpacity>
           )}
           keyExtractor={index => index.iid}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshItems()} />
+          }
         />
       </View>
     );

@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, Alert, Animated, TouchableOpacity, Keyboard } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Alert,
+  Animated,
+  TouchableOpacity,
+  Keyboard,
+  RefreshControl,
+} from 'react-native';
 import { Button, Input, Header } from 'react-native-elements';
 import PropTypes from 'prop-types';
 import FirebaseAPI from '../store/FirebaseAPI';
@@ -19,15 +28,9 @@ export default class MyShoppingList extends Component {
       itemViewOffsetY: new Animated.Value(-500),
       listViewOffsetY: new Animated.Value(-500),
       itemViewIcon: HeaderStyle.Add.Icon,
+      isRefresing: false,
     };
-    FirebaseAPI.getItems()
-      .then(items => {
-        items.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
-        this.setState({ items });
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    this.getItems();
   }
 
   validateInformation = () => {
@@ -103,6 +106,22 @@ export default class MyShoppingList extends Component {
     navigation.toggleDrawer();
   };
 
+  refreshItems = () => {
+    this.setState({ isRefresing: true });
+    this.getItems();
+  };
+
+  getItems = () => {
+    FirebaseAPI.getItems()
+      .then(items => {
+        items.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+        this.setState({ items, isRefresing: false });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
   toggleAddItem() {
     const { itemViewOffsetY, itemViewIsOpen, listViewOffsetY, itemViewHeight } = this.state;
     if (itemViewIsOpen) {
@@ -141,6 +160,7 @@ export default class MyShoppingList extends Component {
       itemViewOffsetY,
       itemViewIsOpen,
       listViewOffsetY,
+      isRefresing,
     } = this.state;
     return (
       <View style={MainContainerStyle}>
@@ -199,7 +219,7 @@ export default class MyShoppingList extends Component {
           </View>
         </Animated.View>
 
-        <Animated.View style={{ transform: [{ translateY: listViewOffsetY }] }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateY: listViewOffsetY }] }}>
           <FlatList
             data={items}
             ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
@@ -218,6 +238,9 @@ export default class MyShoppingList extends Component {
               </TouchableOpacity>
             )}
             keyExtractor={index => index.iid}
+            refreshControl={
+              <RefreshControl refreshing={isRefresing} onRefresh={() => this.refreshItems()} />
+            }
           />
         </Animated.View>
       </View>

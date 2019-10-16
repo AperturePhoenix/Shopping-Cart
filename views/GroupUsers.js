@@ -200,7 +200,7 @@ export default class GroupUsers extends Component {
           </View>
         </Animated.View>
 
-        <Animated.View style={{ transform: [{ translateY: listViewOffsetY }] }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateY: listViewOffsetY }] }}>
           <FlatList
             data={users}
             ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}

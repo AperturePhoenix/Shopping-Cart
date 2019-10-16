@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { Animated, View, Keyboard, FlatList, Text, Alert, TouchableOpacity } from 'react-native';
+import {
+  Animated,
+  View,
+  Keyboard,
+  FlatList,
+  Text,
+  Alert,
+  TouchableOpacity,
+  RefreshControl,
+} from 'react-native';
 import { Header, Button, Input } from 'react-native-elements';
 import { createStackNavigator } from 'react-navigation-stack';
 import PropTypes from 'prop-types';
@@ -28,6 +37,7 @@ export class GroupView extends Component {
       groupViewOffsetY: new Animated.Value(-500),
       listViewOffsetY: new Animated.Value(-500),
       groupViewIcon: HeaderStyle.Add.Icon,
+      isRefreshing: false,
     };
   }
 
@@ -67,11 +77,16 @@ export class GroupView extends Component {
     }
   };
 
+  refreshGroups = () => {
+    this.setState({ isRefreshing: false });
+    this.updateView();
+  };
+
   updateView = () => {
     FirebaseAPI.getGroupList()
       .then(groups => {
         groups.sort((a, b) => (a.groupName < b.groupName ? -1 : 1));
-        this.setState({ groups });
+        this.setState({ groups, isRefreshing: false });
       })
       .catch(error => {
         console.log(error);
@@ -147,6 +162,7 @@ export class GroupView extends Component {
       groupViewOffsetY,
       groupViewIsOpen,
       listViewOffsetY,
+      isRefreshing,
     } = this.state;
     return (
       <View style={MainContainerStyle}>
@@ -196,7 +212,7 @@ export class GroupView extends Component {
           </View>
         </Animated.View>
 
-        <Animated.View style={{ transform: [{ translateY: listViewOffsetY }] }}>
+        <Animated.View style={{ flex: 1, transform: [{ translateY: listViewOffsetY }] }}>
           <FlatList
             data={groups}
             ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
@@ -214,6 +230,9 @@ export class GroupView extends Component {
               </TouchableOpacity>
             )}
             keyExtractor={index => index.gid}
+            refreshControl={
+              <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshGroups()} />
+            }
           />
         </Animated.View>
       </View>
