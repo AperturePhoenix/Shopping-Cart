@@ -55,7 +55,7 @@ export default class FirebaseAPI {
           this.userName = name;
           this.userCollection.doc(userCredential.user.uid).set({
             name,
-            email,
+            email: email.toLowerCase(),
           });
           resolve();
         })
