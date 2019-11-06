@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+  Dimensions,
   View,
   Text,
   FlatList,
@@ -161,11 +162,20 @@ export default class MyShoppingList extends Component {
       itemViewIsOpen,
       listViewOffsetY,
       isRefresing,
+      flatListHeight,
     } = this.state;
     return (
       <View style={MainContainerStyle}>
         <View style={HeaderStyle.ZPosition}>
           <Header
+            onLayout={({
+              nativeEvent: {
+                layout: { height },
+              },
+            }) => {
+              const screenHeight = Dimensions.get('window').height;
+              this.setState({ flatListHeight: screenHeight - height });
+            }}
             placement="left"
             leftComponent={
               <Button
@@ -220,28 +230,30 @@ export default class MyShoppingList extends Component {
         </Animated.View>
 
         <Animated.View style={{ flex: 1, transform: [{ translateY: listViewOffsetY }] }}>
-          <FlatList
-            data={items}
-            ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  margin: 10,
-                }}
-                onPress={() => this.removeItem(item.iid)}
-              >
-                <Text style={FlatListStyle.Text}>{item.itemName}</Text>
-                <Text style={FlatListStyle.Subtle}>{item.itemQuantity}</Text>
-              </TouchableOpacity>
-            )}
-            keyExtractor={index => index.iid}
-            refreshControl={
-              <RefreshControl refreshing={isRefresing} onRefresh={() => this.refreshItems()} />
-            }
-          />
+          <View height={flatListHeight}>
+            <FlatList
+              data={items}
+              ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    margin: 10,
+                  }}
+                  onPress={() => this.removeItem(item.iid)}
+                >
+                  <Text style={FlatListStyle.Text}>{item.itemName}</Text>
+                  <Text style={FlatListStyle.Subtle}>{item.itemQuantity}</Text>
+                </TouchableOpacity>
+              )}
+              keyExtractor={index => index.iid}
+              refreshControl={
+                <RefreshControl refreshing={isRefresing} onRefresh={() => this.refreshItems()} />
+              }
+            />
+          </View>
         </Animated.View>
       </View>
     );

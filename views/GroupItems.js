@@ -87,9 +87,16 @@ export default class GroupItems extends Component {
           ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', margin: 10 }}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                margin: 10,
+              }}
             >
-              <Text style={FlatListStyle.Text}>{item.itemName}</Text>
+              <Text style={FlatListStyle.Text}>
+                {item.itemName} {item.itemQuantity > 1 && `(${item.itemQuantity})`}
+              </Text>
               <Text style={FlatListStyle.Subtle}>{item.name}</Text>
             </TouchableOpacity>
           )}
