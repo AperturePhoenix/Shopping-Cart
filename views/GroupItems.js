@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import { View, Text, SectionList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Header, Button } from 'react-native-elements';
 import PropTypes from 'prop-types';
 import { MainContainerStyle, HeaderStyle, FlatListStyle } from '../store/Styler';
@@ -31,6 +31,29 @@ export default class GroupItems extends Component {
     });
   };
 
+  updateItem = (index, completed) => {
+    const { groupItems } = this.state;
+    const notCompletedList = groupItems[0].data;
+    const completedList = groupItems[1].data;
+    if (completed === false) {
+      const item = notCompletedList[index];
+      item.completed = true;
+      item.completedByUID = FirebaseAPI.auth.currentUser.uid;
+      item.completedByName = FirebaseAPI.userName;
+      notCompletedList.splice(index, 1);
+      completedList.push(item);
+      completedList.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+      FirebaseAPI.updateItem(item.iid, {
+        completed: true,
+        completedByUID: FirebaseAPI.auth.currentUser.uid,
+        completedByName: FirebaseAPI.userName,
+      });
+    }
+    groupItems[0].data = notCompletedList;
+    groupItems[1].data = completedList;
+    this.setState({ groupItems });
+  };
+
   updateUsers = users => {
     const { navigation } = this.props;
     navigation.state.params.callback();
@@ -47,12 +70,20 @@ export default class GroupItems extends Component {
     const uids = this.users.map(value => {
       return value.uid;
     });
+
     FirebaseAPI.getGroupItems(uids)
-      .then(groupItems => {
-        groupItems.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
-        this.setState({ groupItems, isRefreshing: false });
+      .then(({ notCompleted, completed }) => {
+        notCompleted.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+        completed.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+        this.setState({
+          groupItems: [
+            { title: 'Need to Buy', data: notCompleted },
+            { title: 'Completed', data: completed },
+          ],
+          isRefreshing: false,
+        });
       })
-      .catch(error => console.log(error));
+      .catch(console.log);
   };
 
   render() {
@@ -82,10 +113,14 @@ export default class GroupItems extends Component {
           />
         </View>
 
-        <FlatList
-          data={groupItems}
-          ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
-          renderItem={({ item }) => (
+        <SectionList
+          sections={groupItems}
+          keyExtractor={index => index.iid}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshItems()} />
+          }
+          renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
+          renderItem={({ index, item }) => (
             <TouchableOpacity
               style={{
                 flex: 1,
@@ -93,17 +128,15 @@ export default class GroupItems extends Component {
                 justifyContent: 'space-between',
                 margin: 10,
               }}
+              onPress={() => this.updateItem(index, item.completed)}
             >
-              <Text style={FlatListStyle.Text}>
-                {item.itemName} {item.itemQuantity > 1 && `(${item.itemQuantity})`}
+              <Text style={FlatListStyle.Text}>{item.itemName}</Text>
+              <Text style={FlatListStyle.Subtle}>
+                {item.completedByUID ? item.completedByName : item.itemQuantity}
               </Text>
-              <Text style={FlatListStyle.Subtle}>{item.name}</Text>
             </TouchableOpacity>
           )}
-          keyExtractor={index => index.iid}
-          refreshControl={
-            <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshItems()} />
-          }
+          ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
         />
       </View>
     );

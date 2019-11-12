@@ -3,12 +3,12 @@ import {
   Dimensions,
   View,
   Text,
-  FlatList,
   Alert,
   Animated,
   TouchableOpacity,
   Keyboard,
   RefreshControl,
+  SectionList,
 } from 'react-native';
 import { Button, Input, Header } from 'react-native-elements';
 import PropTypes from 'prop-types';
@@ -59,22 +59,21 @@ export default class MyShoppingList extends Component {
   addItem = () => {
     if (this.validateInformation()) {
       const { items, item, quantity } = this.state;
+      const notCompletedList = items[0].data;
       FirebaseAPI.itemExists(item)
         .then(exists => {
           if (!exists) {
             FirebaseAPI.addItem(item, quantity).then(itemEntry => {
-              const itemJoiner = [...items];
-              itemJoiner.push(itemEntry);
-              itemJoiner.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
-              this.setState({ items: [...itemJoiner] });
+              notCompletedList.push(itemEntry);
+              notCompletedList.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+              items[0].data = notCompletedList;
+              this.setState({ items });
             });
           } else {
             Alert.alert('', 'Item is already in the cart');
           }
         })
-        .catch(error => {
-          console.log(error);
-        });
+        .catch(console.log);
     }
   };
 
@@ -85,6 +84,32 @@ export default class MyShoppingList extends Component {
     itemRemover.splice(prevIndex, 1);
     this.setState({ items: itemRemover });
     FirebaseAPI.removeItem(iid);
+  };
+
+  updateItem = (index, completed) => {
+    const { items } = this.state;
+    const notCompletedList = items[0].data;
+    const completedList = items[1].data;
+    if (completed) {
+      FirebaseAPI.removeItem(completedList[index].iid);
+      completedList.splice(index, 1);
+    } else {
+      const item = notCompletedList[index];
+      item.completed = true;
+      item.completedByUID = FirebaseAPI.auth.currentUser.uid;
+      item.completedByName = FirebaseAPI.userName;
+      notCompletedList.splice(index, 1);
+      completedList.push(item);
+      completedList.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+      FirebaseAPI.updateItem(item.iid, {
+        completed: true,
+        completedByUID: FirebaseAPI.auth.currentUser.uid,
+        completedByName: FirebaseAPI.userName,
+      });
+    }
+    items[0].data = notCompletedList;
+    items[1].data = completedList;
+    this.setState({ items });
   };
 
   setItemViewLayout = event => {
@@ -114,13 +139,18 @@ export default class MyShoppingList extends Component {
 
   getItems = () => {
     FirebaseAPI.getItems()
-      .then(items => {
-        items.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
-        this.setState({ items, isRefresing: false });
+      .then(({ notCompleted, completed }) => {
+        notCompleted.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+        completed.sort((a, b) => (a.itemName < b.itemName ? -1 : 1));
+        this.setState({
+          items: [
+            { title: 'Need to Buy', data: notCompleted },
+            { title: 'Completed', data: completed },
+          ],
+          isRefresing: false,
+        });
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(console.log);
   };
 
   toggleAddItem() {
@@ -161,7 +191,7 @@ export default class MyShoppingList extends Component {
       itemViewOffsetY,
       itemViewIsOpen,
       listViewOffsetY,
-      isRefresing,
+      isRefresing: isRefreshing,
       flatListHeight,
     } = this.state;
     return (
@@ -231,10 +261,14 @@ export default class MyShoppingList extends Component {
 
         <Animated.View style={{ flex: 1, transform: [{ translateY: listViewOffsetY }] }}>
           <View height={flatListHeight}>
-            <FlatList
-              data={items}
-              ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
-              renderItem={({ item }) => (
+            <SectionList
+              sections={items}
+              keyExtractor={index => index.iid}
+              refreshControl={
+                <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshItems()} />
+              }
+              renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
+              renderItem={({ index, item }) => (
                 <TouchableOpacity
                   style={{
                     flex: 1,
@@ -242,16 +276,15 @@ export default class MyShoppingList extends Component {
                     justifyContent: 'space-between',
                     margin: 10,
                   }}
-                  onPress={() => this.removeItem(item.iid)}
+                  onPress={() => this.updateItem(index, item.completed)}
                 >
                   <Text style={FlatListStyle.Text}>{item.itemName}</Text>
-                  <Text style={FlatListStyle.Subtle}>{item.itemQuantity}</Text>
+                  <Text style={FlatListStyle.Subtle}>
+                    {item.completedByUID ? item.completedByName : item.itemQuantity}
+                  </Text>
                 </TouchableOpacity>
               )}
-              keyExtractor={index => index.iid}
-              refreshControl={
-                <RefreshControl refreshing={isRefresing} onRefresh={() => this.refreshItems()} />
-              }
+              ItemSeparatorComponent={() => <View style={FlatListStyle.Separator} />}
             />
           </View>
         </Animated.View>

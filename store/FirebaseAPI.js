@@ -137,20 +137,20 @@ export default class FirebaseAPI {
         .where('uid', '==', uid)
         .get()
         .then(querySnapshot => {
-          const items = [];
+          const completedList = [];
+          const notCompletedList = [];
           if (!querySnapshot.empty) {
             querySnapshot.forEach(itemSnapshot => {
-              const { name, itemName, itemQuantity } = itemSnapshot.data();
-              items.push({
-                iid: itemSnapshot.id,
-                uid,
-                name,
-                itemName,
-                itemQuantity,
-              });
+              const item = itemSnapshot.data();
+              item.iid = itemSnapshot.id;
+              if (item.completed === true) {
+                completedList.push(item);
+              } else {
+                notCompletedList.push(item);
+              }
             });
           }
-          resolve(items);
+          resolve({ notCompleted: notCompletedList, completed: completedList });
         })
         .catch(error => reject(error));
     });
@@ -163,6 +163,7 @@ export default class FirebaseAPI {
         name: this.userName,
         itemName,
         itemQuantity: parseInt(quantity, 10),
+        completed: false,
       };
       this.itemCollection
         .add(itemObject)
@@ -180,6 +181,16 @@ export default class FirebaseAPI {
         .doc(iid)
         .delete()
         .catch(error => reject(error));
+    });
+  };
+
+  static updateItem = (iid, fields) => {
+    return new Promise((resolve, reject) => {
+      this.itemCollection
+        .doc(iid)
+        .update(fields)
+        .then(resolve)
+        .catch(reject);
     });
   };
 
@@ -257,13 +268,15 @@ export default class FirebaseAPI {
         return this.getItems(value);
       });
 
-      let groupItems = [];
+      let notCompletedList = [];
+      let completedList = [];
       Promise.all(promises)
         .then(values => {
-          values.forEach(userItems => {
-            groupItems = groupItems.concat(userItems);
+          values.forEach(({ notCompleted, completed }) => {
+            notCompletedList = notCompletedList.concat(notCompleted);
+            completedList = completedList.concat(completed);
           });
-          resolve(groupItems);
+          resolve({ notCompleted: notCompletedList, completed: completedList });
         })
         .catch(error => reject(error));
     });
