@@ -119,7 +119,9 @@ export default class GroupItems extends Component {
           refreshControl={
             <RefreshControl refreshing={isRefreshing} onRefresh={() => this.refreshItems()} />
           }
-          renderSectionHeader={({ section: { title } }) => <Text>{title}</Text>}
+          renderSectionHeader={({ section: { title, data } }) =>
+            data.length > 0 ? <Text>{title}</Text> : null
+          }
           renderItem={({ index, item }) => (
             <TouchableOpacity
               style={{
